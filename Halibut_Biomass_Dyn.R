@@ -29,7 +29,7 @@ require(xlsx)
 
 #Working Directory
 if(.Platform$OS.type=='unix') { #Laptop
-  wd <- '/Users/curryc2/Documents/2016/Reimer Halibut/Dynamic Model'
+  wd <- '/Users/curryc2/Documents/2016/Reimer Halibut/Halibut_BioEcon'
 }else { #Desktop
   wd <- NULL  
 }
