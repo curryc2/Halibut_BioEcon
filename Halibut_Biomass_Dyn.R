@@ -17,6 +17,7 @@
 #NOTES:
 #  1) Total fishing mortality includes mortality for discards.
 #  2) Dimensions for demographic parameters halibut$theta... are sex first, Female,Male
+#  3) Successfully setup with GitHub for cross-platform use
 #*************************************************************************************************
 require(ggplot2)
 require(gridExtra)
