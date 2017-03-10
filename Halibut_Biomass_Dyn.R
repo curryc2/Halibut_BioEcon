@@ -31,7 +31,7 @@ require(xlsx)
 if(.Platform$OS.type=='unix') { #Laptop
   wd <- '/Users/curryc2/Documents/2016/Reimer Halibut/Halibut_BioEcon'
 }else { #Desktop
-  wd <- NULL  
+  wd <- "//nmfs.local/AKC-ABL/Users/curry.cunningham/Desktop/GitHub/Halibut_BioEcon"  
 }
 setwd(wd)
 
