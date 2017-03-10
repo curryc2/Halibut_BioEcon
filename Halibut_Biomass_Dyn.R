@@ -47,7 +47,7 @@ source('R/Halibut_Plot_Fxns.R')
 
 #READ IN DATA from excel input file
 load('data/halibut.rda')
-source('R/fisheryFootprint_plus.R')
+source('R/fisheryFootprint_plus.R') #This is an updated version of Steve's functions
 
 #=============================================================
 #Adjust halibut object values based on inputs from spreadsheet
