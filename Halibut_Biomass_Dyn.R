@@ -47,20 +47,29 @@ source('R/Halibut_Plot_Fxns.R')
 
 #READ IN DATA from excel input file
 load('data/halibut.rda')
+source('R/fisheryFootprint_plus.R')
 
 #=============================================================
 #Adjust halibut object values based on inputs from spreadsheet
 #Growth
 in.growth <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Growth')
-halibut$theta$linf <- as.vector(in.growth[in.growth$Par=='linf',(2:3)])
-halibut$theta$vbk <- as.vector(in.growth[in.growth$Par=='vbk',(2:3)])
-halibut$theta$to <- as.vector(in.growth[in.growth$Par=='to',(2:3)])
+halibut$theta$linf <- as.numeric(in.growth[in.growth$Par=='linf',(2:3)])
+halibut$theta$vbk <- as.numeric(in.growth[in.growth$Par=='vbk',(2:3)])
+halibut$theta$to <- as.numeric(in.growth[in.growth$Par=='to',(2:3)])
+halibut$theta$a <- as.numeric(in.growth[in.growth$Par=='a',(2:3)])
+halibut$theta$b <- as.numeric(in.growth[in.growth$Par=='b',(2:3)])
+#Maturity
+in.maturity <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Maturity')
+halibut$theta$ahat <- as.numeric(in.maturity[in.maturity$Par=='ahat',(2:3)])
+halibut$theta$ghat <- as.numeric(in.maturity[in.maturity$Par=='ghat',(2:3)])
+#Mortality
+in.mortality <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Mortality')
+halibut$theta$m <- as.numeric(in.maturity[in.maturity$Par=='m',(2:3)])
+halibut$theta
 
-halibut
 
 
-
-
+out <- getSelectivities(halibut)
 
 
 
