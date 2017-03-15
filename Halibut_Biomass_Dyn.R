@@ -27,6 +27,7 @@ require(snowfall)
 require(parallel)
 require(reshape2)
 require(xlsx)
+require(corrplot)
 
 #Working Directory
 if(.Platform$OS.type=='unix') { #Laptop
