@@ -65,8 +65,8 @@ halibut$theta$ahat <- as.numeric(in.maturity[in.maturity$Par=='ahat',(2:3)])
 halibut$theta$ghat <- as.numeric(in.maturity[in.maturity$Par=='ghat',(2:3)])
 #Mortality
 in.mortality <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Mortality')
-halibut$theta$m <- as.numeric(in.maturity[in.maturity$Par=='m',(2:3)])
-halibut$theta
+halibut$theta$m <- as.numeric(in.mortality[in.mortality$Par=='m',(2:3)])
+halibut$theta$A <- max(in.mortality[in.mortality$Par=='A',2:3])
 
 
 
