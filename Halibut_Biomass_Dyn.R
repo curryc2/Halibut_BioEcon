@@ -33,7 +33,7 @@ require(corrplot)
 if(.Platform$OS.type=='unix') { #Laptop
   wd <- '/Users/curryc2/Documents/2016/Reimer Halibut/Halibut_BioEcon'
 }else { #Desktop
-  wd <- "//nmfs.local/AKC-ABL/Users/curry.cunningham/Desktop/GitHub/Halibut_BioEcon"  
+  wd <- "//nmfs.local/AKC-ABL/Users/curry.cunningham/My Documents/Projects/Halibut MSE/Halibut_BioEcon"  
 }
 setwd(wd)
 
@@ -67,10 +67,59 @@ halibut$theta$ghat <- as.numeric(in.maturity[in.maturity$Par=='ghat',(2:3)])
 in.mortality <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Mortality')
 halibut$theta$m <- as.numeric(in.mortality[in.mortality$Par=='m',(2:3)])
 halibut$theta$A <- max(in.mortality[in.mortality$Par=='A',2:3])
+#Fishery Selectivity
+in.selex <- read.xlsx2('Halibut Model Inputs.xlsx', sheetName='FisherySelectivity', stringsAsFactors=FALSE, header=TRUE)
+halibut$MP$slx1 <- as.numeric(in.selex[in.selex$Par=='mu',c(2:5)])
+halibut$MP$slx2 <- as.numeric(in.selex[in.selex$Par=='sigma',c(2:5)])
+halibut$MP$slx3 <- as.numeric(in.selex[in.selex$Par=='gamma',c(2:5)])
+halibut$MP$slx4 <- as.numeric(in.selex[in.selex$Par=='plus.age',c(2:5)])  #Plus group age for selectivity
+halibut$MP$slim <- as.numeric(in.selex[in.selex$Par=='slim',c(2:5)])  #Minimum size for retention
+halibut$MP$ulim <- as.numeric(in.selex[in.selex$Par=='ulim',c(2:5)])  #Maximum size for retention
+halibut$MP$dmr <- as.numeric(in.selex[in.selex$Par=='dmr',c(2:5)])  #Discard Mortality Rate
 
 
+#INPUT FISHING MORTALITY RATES
+fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')
+
+#Input control parameters
+in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
+n.yrs <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
+Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
+
+#
 
 out <- getSelectivities(halibut)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
