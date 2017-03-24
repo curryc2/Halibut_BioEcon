@@ -6,6 +6,8 @@
 # 	eqModel
 #   yieldEquivalence
 
+#NOTE: Funtions originally written by Steve Martell
+
 
 
 #' Calculate the equivalent yield by sequentially removing each fishery.
@@ -476,9 +478,10 @@ getAgeSchedules <- function(ffp)
 {
 	with(ffp$theta,{
 		# Length-at-age, weight-at-age, mature weight-at-age
-		vonb <- function(age,linf,k,to) {return( linf*(1-exp(-k*(age+to))) )}
+		# vonb <- function(age,linf,k,to) {return( linf*(1-exp(-k*(age+to))) )}
+		vonb <- function(age,linf,k,to) {return( linf*(1-exp(-k*(age-to))) )}
 		la <- sapply(age,vonb,linf=linf,k=vbk,to=to)
-		wa <- a*la^b
+		wa <- a*la^b #Error here
 		ma <- sapply(age, plogis, location=ahat, scale=ghat);  ma[,1:7] <- 0
 		fa <- ma * wa
 

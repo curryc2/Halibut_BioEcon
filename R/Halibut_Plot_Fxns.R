@@ -58,3 +58,69 @@ plot.landings <- function(dpi=300) {
 
 
 
+#' Plot growth and allometry characteristics 
+#'
+#' @param ageSchedules Object containing age schedules calculated by getAgeSchedules function
+#'
+#' @export
+plot.growth_allometry <- function(ageSchedules) {
+  require(ggplot2)
+  require(reshape2)
+  
+  dpi <- 500
+  
+  #Create Directory in plots
+  plot.dir <- 'plots/Growth and Allometry'
+  dir.create(plot.dir)
+  
+  ages <- ageSchedules$theta$age
+  
+  ####################
+  #Plot Length@Age
+  lengths <- ageSchedules$ageSc$la
+  dimnames(lengths) <- list(c('Female','Male'), ages)
+  la.df <- data.frame(ages, t(lengths))
+  la.list <- melt(la.df, id.vars=list('ages'))
+  names(la.list) <- c('Age','Sex','value')
+  #Plot
+  plt.la <- ggplot(la.list, aes(x=Age, y=value, color=Sex)) +
+              theme_gray() +
+              geom_line(lwd=1.5) +
+              ylab('Length (cm)')
+  # plt.la
+  
+  ####################
+  #Plot Weight@Age
+  weights <- ageSchedules$ageSc$wa
+  dimnames(weights) <- list(c('Female','Male'), ages)
+  wa.df <- data.frame(ages, t(weights))
+  wa.list <- melt(wa.df, id.vars=list('ages'))
+  names(wa.list) <- c('Age','Sex','value')
+  #Plot
+  plt.wa <- ggplot(wa.list, aes(x=Age, y=value, color=Sex)) +
+              theme_gray() +
+              geom_line(lwd=1.5) +
+              ylab('Weight (pounds)')
+  
+  ggsave(paste0(plot.dir,'/Weight_at_Age.png'), plot=plt.wa, height=4, width=6, units='in', dpi=dpi)
+  ####################
+  #Plot Matruity@Age
+  maturity <- ageSchedules$ageSc$ma
+  dimnames(maturity) <- list(c('Female','Male'), ages)
+  ma.df <- data.frame(ages, t(weights))
+  wa.list <- melt(wa.df, id.vars=list('ages'))
+  names(wa.list) <- c('Age','Sex','value')
+  #Plot
+  plt.wa <- ggplot(wa.list, aes(x=Age, y=value, color=Sex)) +
+    theme_gray() +
+    geom_line(lwd=1.5) +
+    ylab('Weight (pounds)')
+  
+  
+  
+  
+
+  
+}
+
+

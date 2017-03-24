@@ -76,6 +76,10 @@ halibut$MP$slx4 <- as.numeric(in.selex[in.selex$Par=='plus.age',c(2:5)])  #Plus 
 halibut$MP$slim <- as.numeric(in.selex[in.selex$Par=='slim',c(2:5)])  #Minimum size for retention
 halibut$MP$ulim <- as.numeric(in.selex[in.selex$Par=='ulim',c(2:5)])  #Maximum size for retention
 halibut$MP$dmr <- as.numeric(in.selex[in.selex$Par=='dmr',c(2:5)])  #Discard Mortality Rate
+# halibut$MP$pscLimit <- as.numeric(in.selex[in.selex$Par=='pscLimit',c(2:5)])  #Prohibited species catch limit
+halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
+halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
+halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
 
 
 #INPUT FISHING MORTALITY RATES
@@ -86,9 +90,12 @@ in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
 n.yrs <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
+#Determine Age Schedules
+ageSchedules <- getAgeSchedules(halibut)
+
 #
 
-out <- getSelectivities(halibut)
+selex <- getSelectivities(halibut)
 
 
 
