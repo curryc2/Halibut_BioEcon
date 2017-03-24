@@ -90,12 +90,16 @@ in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
 n.yrs <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
+#=========================================
 #Determine Age Schedules
 ageSchedules <- getAgeSchedules(halibut)
-
+#Plot Age Schedule
+plot.growth_allometry(ageSchedules)
 #
 
-selex <- getSelectivities(halibut)
+#=========================================
+#Determine Selectivities
+selectivity <- getSelectivities(halibut)
 
 
 

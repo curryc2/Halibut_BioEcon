@@ -143,3 +143,74 @@ plot.growth_allometry <- function(ageSchedules) {
 }
 
 
+
+plot.selectivity <- function(selectivity) {
+  require(ggplot2)
+  require(reshape2)
+  
+  dpi <- 500
+  
+  #Create Directory in plots
+  plot.dir <- 'plots/Selectivity'
+  dir.create(plot.dir)
+  
+  ages <- selectivity$theta$age
+  sectors <- selectivity$MP$sector
+  
+  ####################
+  #Probability of Capture
+  probCap <- selectivity$probCap
+  dimnames(probCap) <- list(c('Female','Male'), ages, sectors)
+  probCap.list <- melt(probCap)
+  names(probCap.list) <- c('Sex','Age','Sector','value')
+  #Plot
+  plt.probCap <- ggplot(probCap.list, aes(x=Age, y=value, color=Sector)) +
+    theme_gray() +
+    geom_line(lwd=1) +
+    # geom_point(pch=21, fill='black', size=1.5) +
+    geom_point(pch=21, colour='black', aes(fill=Sector), size=1.5) +
+    facet_wrap(~Sex, ncol=1) +
+    ylab('Probability of Capture')
+  # plt.probCap
+  ggsave(paste0(plot.dir,'/Probability of Capture.png'), plot=plt.probCap, height=4, width=5, units='in', dpi=dpi)
+  
+  plt.probCap.2 <- ggplot(probCap.list, aes(x=Age, y=value, color=Sex)) +
+    theme_gray() +
+    geom_line(lwd=1) +
+    geom_point(pch=21, fill='black', size=1.5) +
+    # geom_point(pch=21, colour='black', aes(fill=Sex), size=1.5) +
+    facet_wrap(~Sector, ncol=1) +
+    ylab('Probability of Capture')
+  # plt.probCap.2
+  ggsave(paste0(plot.dir,'/Probability of Capture 2.png'), plot=plt.probCap.2, height=6, width=5, units='in', dpi=dpi)
+  
+  ####################
+  #Probability of Retain
+  probRet <- selectivity$probRetain
+  dimnames(probRet) <- list(c('Female','Male'), ages, sectors)
+  probRet.list <- melt(probRet)
+  names(probRet.list) <- c('Sex','Age','Sector','value')
+  #Plot
+  plt.probRet <- ggplot(probRet.list, aes(x=Age, y=value, color=Sector)) +
+    theme_gray() +
+    geom_line(lwd=1) +
+    # geom_point(pch=21, fill='black', size=1.5) +
+    geom_point(pch=21, colour='black', aes(fill=Sector), size=1.5) +
+    facet_wrap(~Sex, ncol=1) +
+    ylab('Probability of Retaining an Individual at Age')
+  # plt.probCap
+  ggsave(paste0(plot.dir,'/Probability of Retain.png'), plot=plt.probRet, height=4, width=5, units='in', dpi=dpi)
+  
+  plt.probRet.2 <- ggplot(probRet.list, aes(x=Age, y=value, color=Sex)) +
+    theme_gray() +
+    geom_line(lwd=1) +
+    geom_point(pch=21, fill='black', size=1.5) +
+    # geom_point(pch=21, colour='black', aes(fill=Sex), size=1.5) +
+    facet_wrap(~Sector, ncol=1) +
+    ylab('Probability of Retaining an Individual at Age')
+  # plt.probRet.2
+  ggsave(paste0(plot.dir,'/Probability of Retain 2.png'), plot=plt.probRet.2, height=6, width=5, units='in', dpi=dpi)
+  
+  
+  
+}
