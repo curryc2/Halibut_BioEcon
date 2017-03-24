@@ -86,8 +86,10 @@ plot.growth_allometry <- function(ageSchedules) {
   plt.la <- ggplot(la.list, aes(x=Age, y=value, color=Sex)) +
               theme_gray() +
               geom_line(lwd=1.5) +
+              geom_point(pch=21, fill='black', size=1.5) +
               ylab('Length (cm)')
   # plt.la
+  ggsave(paste0(plot.dir,'/Length_at_Age.png'), plot=plt.la, height=4, width=6, units='in', dpi=dpi)
   
   ####################
   #Plot Weight@Age
@@ -100,26 +102,43 @@ plot.growth_allometry <- function(ageSchedules) {
   plt.wa <- ggplot(wa.list, aes(x=Age, y=value, color=Sex)) +
               theme_gray() +
               geom_line(lwd=1.5) +
+              geom_point(pch=21, fill='black', size=1.5) +
               ylab('Weight (pounds)')
   
   ggsave(paste0(plot.dir,'/Weight_at_Age.png'), plot=plt.wa, height=4, width=6, units='in', dpi=dpi)
+  
+  ####################
+  #Plot Length and Weight
+  la.list.2 <- cbind(la.list,'Length (cm)')
+  wa.list.2 <- cbind(wa.list,'Weight (pounds)')
+  names(la.list.2)[4] <- 'variable'
+  names(wa.list.2)[4] <- 'variable'
+  
+  la.wa.list <- rbind(la.list.2, wa.list.2)
+  
+  plt.la.wa <- ggplot(la.wa.list, aes(x=Age, y=value, color=Sex)) +
+                 theme_gray() +
+                 geom_line(lwd=1.5) +
+                 geom_point(pch=21, fill='black', size=1.5) +
+                 facet_wrap(~variable, ncol=1, scales='free')
+  ggsave(paste0(plot.dir,'/Length_Weight_at_Age.png'), plot=plt.la.wa, 
+           height=6, width=6, units='in', dpi=dpi)
+                 
   ####################
   #Plot Matruity@Age
-  maturity <- ageSchedules$ageSc$ma
-  dimnames(maturity) <- list(c('Female','Male'), ages)
-  ma.df <- data.frame(ages, t(weights))
-  wa.list <- melt(wa.df, id.vars=list('ages'))
-  names(wa.list) <- c('Age','Sex','value')
+  Maturity <- ageSchedules$ageSc$ma[1,]
+  Fecundity <- ageSchedules$ageSc$fa[1,]
+  reprod.df <- data.frame(ages, Maturity, Fecundity)
+  reprod.list <- melt(reprod.df, id.vars=list('ages'))
+  names(reprod.list)[1] <- 'Age'
   #Plot
-  plt.wa <- ggplot(wa.list, aes(x=Age, y=value, color=Sex)) +
+  plt.reprod <- ggplot(reprod.list, aes(x=Age, y=value)) +
     theme_gray() +
-    geom_line(lwd=1.5) +
-    ylab('Weight (pounds)')
-  
-  
-  
-  
-
+    # geom_area(aes(y=value),  fill='red', alpha=0.25)
+    geom_line(lwd=1.5, colour='blue') +
+    geom_point(pch=21, fill='red', size=1.5) +
+    facet_wrap(~variable, scales='free', ncol=1)
+  ggsave(paste0(plot.dir,'/Maturity.png'), plot=plt.reprod, height=4, width=6, units='in', dpi=dpi)
   
 }
 
