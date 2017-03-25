@@ -94,13 +94,18 @@ Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 #Determine Age Schedules
 ageSchedules <- getAgeSchedules(halibut)
 #Plot Age Schedule
-plot.growth_allometry(ageSchedules)
+plot.growth_allometry(ageSchedules, dpi=500)
 #
 
 #=========================================
 #Determine Selectivities
 selectivity <- getSelectivities(halibut)
 
+plot.selectivity(selectivity, dpi=500, pt.blk=FALSE)
+
+
+
+#
 
 
 
