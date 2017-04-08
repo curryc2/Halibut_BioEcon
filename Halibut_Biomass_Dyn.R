@@ -18,6 +18,8 @@
 #  1) Total fishing mortality includes mortality for discards.
 #  2) Dimensions for demographic parameters halibut$theta... are sex first, Female,Male
 #  3) Successfully setup with GitHub for cross-platform use
+#  4) Population viability analysis?
+#       Only comfortable 
 #*************************************************************************************************
 require(ggplot2)
 require(gridExtra)
@@ -49,6 +51,11 @@ source('R/Halibut_Plot_Fxns.R')
 #READ IN DATA from excel input file
 load('data/halibut.rda')
 source('R/fisheryFootprint_plus.R') #This is an updated version of Steve's functions
+
+#=============================================================
+##### CONTROL SECTION #####
+do.init.plots <- FALSE
+
 
 #=============================================================
 #Adjust halibut object values based on inputs from spreadsheet
@@ -87,26 +94,53 @@ fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')
 
 #Input control parameters
 in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
-n.yrs <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
+n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
 #=========================================
+halibut <- getSelectivities(halibut)
 #Determine Age Schedules
-ageSchedules <- getAgeSchedules(halibut)
+# ageSchedules <- getAgeSchedules(halibut)
 #Plot Age Schedule
-plot.growth_allometry(ageSchedules, dpi=500)
+if(do.init.plots==TRUE) { plot.growth_allometry(ageSchedules=halibut, dpi=500) }
 #
 
 #=========================================
 #Determine Selectivities
-selectivity <- getSelectivities(halibut)
+# selectivity <- getSelectivities(halibut)
 
-plot.selectivity(selectivity, dpi=500, pt.blk=FALSE)
+if(do.init.plots==TRUE) { plot.selectivity(selectivity=halibut, dpi=500, pt.blk=FALSE) }
+
+#=========================================
+#Extract variables
+n.age  <- halibut$theta$A
+n.gear <- dim(halibut$MP)[1]
+n.sex  <- halibut$theta$H
+va    <- as.array(selectivity$selex) #Overall selectivity
+wa    <- ageSchedules$ageSc$wa #Weight at Age
+fa    <- ageSchedules$ageSc$fa #Fecundity at age
+
+#Age Schedule stuff
+mx <- ageSchedules$ageSc$
+
+sexes <- c('Female','Male')
 
 
+lz  <- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
+za  <- matrix(0,nrow=n.sex,ncol=n.age)
+qa  <- array(0,dim=c(n.sex,n.age,n.gear))
+pa  <- array(0,dim=c(n.sex,n.age,n.gear))
+ra  <- array(0,dim=c(n.sex,n.age,n.gear))
+dlz <- array(0,dim=c(n.sex,n.age,n.gear))
 
-#
+#=========================================
+#Define Data Structures
+N <- array(dim=c(n.sex, n.years, n.age), dimnames=list(sexes, c(1:n.years), halibut$theta$age))
+surv <- array(dim=c(n.sex, n.years, n.age), dimnames=list(sexes, c(1:n.years), halibut$theta$age))
+rec <- array(dim=c(n.sex, n.years), dimnames=list(sexes, c(1:n.years)))
 
+#Define initial population structure based on equilibirum conditions
+Bstart*1e6
 
 
 
