@@ -116,12 +116,12 @@ if(do.init.plots==TRUE) { plot.selectivity(selectivity=halibut, dpi=500, pt.blk=
 n.age  <- halibut$theta$A
 n.gear <- dim(halibut$MP)[1]
 n.sex  <- halibut$theta$H
-va    <- as.array(selectivity$selex) #Overall selectivity
-wa    <- ageSchedules$ageSc$wa #Weight at Age
-fa    <- ageSchedules$ageSc$fa #Fecundity at age
+va    <- as.array(halibut$selex) #Overall selectivity
+wa    <- halibut$ageSc$wa #Weight at Age
+fa    <- halibut$ageSc$fa #Fecundity at age
 
 #Age Schedule stuff
-mx <- ageSchedules$ageSc$
+mx <- halibut$ageSc$mx
 
 sexes <- c('Female','Male')
 
@@ -135,12 +135,13 @@ dlz <- array(0,dim=c(n.sex,n.age,n.gear))
 
 #=========================================
 #Define Data Structures
-N <- array(dim=c(n.sex, n.years, n.age), dimnames=list(sexes, c(1:n.years), halibut$theta$age))
-surv <- array(dim=c(n.sex, n.years, n.age), dimnames=list(sexes, c(1:n.years), halibut$theta$age))
-rec <- array(dim=c(n.sex, n.years), dimnames=list(sexes, c(1:n.years)))
+N <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
+surv <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
+rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, c(1:n.year)))
 
 #Define initial population structure based on equilibirum conditions
 Bstart*1e6
+
 
 
 
