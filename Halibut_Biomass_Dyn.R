@@ -20,6 +20,12 @@
 #  3) Successfully setup with GitHub for cross-platform use
 #  4) Population viability analysis?
 #       Only comfortable 
+
+#Ricker
+# R <- S*exp(1.25*log(5*h)*(1-(S/Seq)))
+#Beverton-Holt
+# R <- S/(1-((5*h-1)/(4*h))*(1-(S/(Seq))))
+
 #*************************************************************************************************
 require(ggplot2)
 require(gridExtra)
@@ -88,6 +94,10 @@ halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
 halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
 halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
 
+#Recruitment Parameter Inputs
+in.rec <- read.xlsx2('Halibut Model Inputs.xlsx', sheetName='Recruitment', stringsAsFactors=FALSE)
+halibut$rec$h <- as.numeric(in.rec$Value[in.rec$Par=='h'])
+halibut$rec$sigma_rec <- as.numeric(in.rec$Value[in.rec$Par=='sigma_rec'])
 
 #INPUT FISHING MORTALITY RATES
 fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
@@ -95,6 +105,7 @@ fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
 #Input control parameters
 in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
 n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
+years <- 1:n.year
 Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
 #=========================================
@@ -118,11 +129,14 @@ n.gear <- dim(halibut$MP)[1]
 n.sex  <- halibut$theta$H
 va    <- as.array(halibut$selex) #Overall selectivity
 
+
+
 probCap <- as.array(halibut$probCap) #Probability of capture @ age
 probRetain <- as.array(halibut$probRetain)
 
-wa    <- halibut$ageSc$wa #Weight at Age
-fa    <- halibut$ageSc$fa #Fecundity at age
+wa <- halibut$ageSc$wa #Weight at Age
+fa <- halibut$ageSc$fa #Fecundity at age
+
 
 #Age Schedule stuff
 mx <- halibut$ageSc$mx  #Natural mortality @ age
@@ -132,7 +146,15 @@ ma <- halibut$ageSc$ma  #Maturity @ age
 fa <- halibut$ageSc$fa  #Fecundity @ age
 lx <- halibut$ageSc$lx  #Survivorship to age
 
+#Age Information
+ages <- halibut$theta$age
+plus.age <- halibut$theta$A
 sexes <- c('Female','Male')
+
+#Recruitment
+h <- halibut$rec$h
+sigma_rec <- halibut$rec$sigma_rec
+bo <- halibut$theta$bo*1e6
 
 
 lz  <- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
@@ -144,20 +166,22 @@ dlz <- array(0,dim=c(n.sex,n.age,n.gear))
 
 #========================================================
 #Define Data Structures
-B <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age)) #Biomass (pounds)
-N <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age)) #Numbers
-harvest <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
+B <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Biomass (pounds)
+N <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Numbers
+C <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
+harvest <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, n.gear))  #Harvest by gear type
   
 #Total Instantaneous mortality
-Z <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
-Fmort.a <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
+Z.a <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) 
+F.a <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Fishing mortality
 
 #Continuous
-surv <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
-mort <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, c(1:n.year), halibut$theta$age))
+surv <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
+mort <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
 
 #Recruitment
-rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, c(1:n.year)))
+ssb <- vector(length=n.year) #Female spawning-stock biomass
+rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
 
 #Define initial population structure based on equilibirum conditions
 
@@ -178,17 +202,52 @@ N[,1,] <- B[,1,] /wa
 #BEGIN SIMULATION
 
 #Calculate age-specific fishing mortality rates
-dim(F)
+dim(F.a)
 dim(va)
 
-y <- 2
-for(y in 2:n.year) {
+y <- 1
+for(y in 1:(n.year-1)) {
+  
+  #Initial Recruitment
+  ssb[y] <- sum(fa*N[,y,])
+  
+  #Ricker
+  # rec[,y] <- ssb[y]*exp(1.25*log(5*h)*(1-(ssb[y]/bo)))
+  #Beverton-Holt
+  rec[,y] <- 0.5*ssb[y]/(1-((5*h-1)/(4*h))*(1-(ssb[y]/(bo)))) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  
+  #Update Numbers and Biomass Matrix
+  B[,y,1] <- rec[,y]
+  N[,y,1] <- rec[,y]/wa[,1]
+  
+  a <- 2
+  for(a in 2:(plus.age-1)) {
+    h <- 1
+    for(h in 1:n.sex) {
+      g <- 1
+      for(g in 1:n.gear) {
+        # harvest[h,y,a,g] <- 
+      }#next gear
+      #Instantaneous Version
+      F.a[h,y,a] <- sum(fmort[y,]*va[h,a,])
+      Z.a[h,y,a] <- F.a[h,y,a] + mx[h,a]  #Natural mortality is NOT time-varying
+      
+      #Continuous
+      
+    }#next sex
+  }
+  
+  #Plus Group
   
   #Calculate fishing mortality
-  fmort
+
   
-  N[,y,] <- N[,(y-1), ]* 
+  Fmort.a[,y,]  fmort[y,] * va
+  
+  N[,y+1,] <- N[,y, ]* 
+  
     
+  for(a in 1:)    
     
   
   #Calculate recruitment
@@ -215,8 +274,7 @@ for(s in 1:n.sex) {
 
 
 
-#Recruitment Ricker
-R <- S*exp(1.25*log(5*h)*(1-(S/Seq)))
+
 
 
 
