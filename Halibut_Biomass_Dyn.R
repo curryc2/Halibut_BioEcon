@@ -47,6 +47,8 @@ setwd(wd)
 
 #Sources
 source('R/Halibut_Plot_Fxns.R')
+source('R/ricker-recruit.R')
+source('R/beverton-holt-recruit.R')
 
 
 #PRELIMINARY PLOTS
@@ -195,11 +197,17 @@ init.prop.B <- lx*wa
 init.prop.B <- init.prop.B/sum(init.prop.B)
 
 
+#This should be updated
+
 #Initial Biomass
 B[,1,] <- Bstart*1e6 * init.prop.B
 
 #Initial Numbers of Individuals
 N[,1,] <- B[,1,] /wa
+
+
+#Alternative Equilibrium Approximation
+
 
 
 ##################################################
@@ -218,10 +226,10 @@ for(y in 2:n.year) {
   #Ricker
   # rec[,y] <- ssb[y]*exp(1.25*log(5*h)*(1-(ssb[y]/bo)))
   #Beverton-Holt
-  rec[,y-1] <- 0.5*ssb[y-1]/(1-((5*h-1)/(4*h))*(1-(ssb[y-1]/(bo)))) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1] <- 0.5* beverton_holt_recruit(ssb[y-1], h, bo) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
   #Update Numbers and Biomass Matrix
-  a <- 1
+  a <- 1 #Age-1
   B[,y,a] <- rec[,y-1]
   N[,y,a] <- rec[,y-1]/wa[,a]
   
