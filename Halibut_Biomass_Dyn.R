@@ -49,7 +49,7 @@ setwd(wd)
 source('R/Halibut_Plot_Fxns.R')
 source('R/ricker-recruit.R')
 source('R/beverton-holt-recruit.R')
-
+source('R/get-fished-survivorship.R')
 
 #PRELIMINARY PLOTS
 # plot.landings(dpi=600)
@@ -137,8 +137,8 @@ gears <- as.vector(halibut$MP$sector)
 probCap <- as.array(halibut$probCap) #Probability of capture @ age
 probRetain <- as.array(halibut$probRetain)
 
-wa <- halibut$ageSc$wa #Weight at Age
-fa <- halibut$ageSc$fa #Fecundity at age
+wa <- halibut$ageSc$wa #Weight @ age
+fa <- halibut$ageSc$fa #Female spawning biomass @ age
 
 
 #Age Schedule stuff
@@ -173,8 +173,8 @@ B <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Biom
 N <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Numbers
 C.b <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Catch (lbs)
 C.n <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Catch (number)
-harvest.b <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, n.gear))  #Harvest (lbs) by gear type
-harvest.n <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, n.gear))  #Harvest (number) by gear type
+harvest.b <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, gears))  #Harvest (lbs) by gear type
+harvest.n <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, gears))  #Harvest (number) by gear type
 
 
 #Total Instantaneous mortality
@@ -206,9 +206,37 @@ B[,1,] <- Bstart*1e6 * init.prop.B
 N[,1,] <- B[,1,] /wa
 
 
-#Alternative Equilibrium Approximation
-
-
+#Calculate equilibrium recruitment
+# fx <- get_fished_survivorship(halibut, F_eq=apply(fmort, 2, mean))
+# 
+# phi.e <- sum(fx*fa)
+# 
+# 
+# ro_fished <- log(bo/phi.e)
+# 
+# ro <- halibut$ageSc$ro
+# 
+# temp <- array(dim=c(n.sex,n.age))
+# 
+# s <- 1
+# for(s in 1:n.sex) {
+#   a <- 1
+#   for(a in ages) {
+#     if(a == min(age)) {
+#       temp[s,a] <- exp(ro)
+#     } else {
+#       temp[s,a] <- exp(ro)*exp(-sum(mx[s,(1:(a-1))]))
+#     }
+#     if(a == A) {
+#       temp[s,a] <- temp[s,a] / (1-exp(-mx[s,a]  ))
+#     }
+#   }#next age
+# }#next sex
+# 
+# B[,1,] <- temp[s,a]
+# N[,1,] <- B[,1,] /wa
+# 
+# log(bo/sum(lx*fa))
 
 ##################################################
 #BEGIN SIMULATION
@@ -226,7 +254,7 @@ for(y in 2:n.year) {
   #Ricker
   # rec[,y] <- ssb[y]*exp(1.25*log(5*h)*(1-(ssb[y]/bo)))
   #Beverton-Holt
-  rec[,y-1] <- 0.5* beverton_holt_recruit(ssb[y-1], h, bo) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1] <- 0.5 * beverton_holt_recruit(ssb[y-1], h, bo) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
   #Update Numbers and Biomass Matrix
   a <- 1 #Age-1
@@ -237,10 +265,7 @@ for(y in 2:n.year) {
   for(a in 2:(plus.age-1)) {
     h <- 1
     for(h in 1:n.sex) {
-      g <- 1
-      for(g in 1:n.gear) {
-        # harvest.n[h,y-1,a-1,g] <- 
-      }#next gear
+
       #Instantaneous Version
       F.a[h,y-1,a-1] <- sum(fmort[y-1,]*va[h,a-1,])
       Z.a[h,y-1,a-1] <- F.a[h,y-1,a-1] + mx[h,a-1]  #Natural mortality is NOT time-varying
@@ -252,8 +277,17 @@ for(y in 2:n.year) {
       #Update
       B[h,y,a] <- B[h,y-1,a-1]*surv[h,y-1,a-1]
       N[h,y,a] <- N[h,y-1,a-1]*surv[h,y-1,a-1]
+      #Total Catch
       C.n[h,y-1,a-1] <- N[h,y-1,a-1] * (F.a[h,y-1,a-1]/Z.a[h,y-1,a-1]) * (1-exp(-1*Z.a[h,y-1,a-1])) #Catch in number of halibut
       C.b[h,y-1,a-1] <- C.n[h,y-1,a-1] * wa[h,a]
+      
+      g <- 1
+      for(g in 1:n.gear) {
+        temp.F <- 
+        temp.Z <- 
+        harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (F.a[h,y-1,a-1]/Z.a[h,y-1,a-1]) * (1-exp(-1*Z.a[h,y-1,a-1]))
+        harvest.b[h,y-1,a-1,g] <- harvest.n[h,y-1,a-1,g] * wa[h,a]
+      }#next gear
       
     }#next sex
   }#next age
