@@ -186,16 +186,17 @@ surv <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
 mort <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
 
 #Recruitment
-ssb <- vector(length=n.year) #Female spawning-stock biomass
+ssb <- array(dim=c(n.sex, n.age, n.year), dimnames=list(sexes, ages, years)) #Female spawning-stock biomass
 rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
 
 #Define initial population structure based on equilibirum conditions
 
 #Calculate expected biomass proportions by weight
-init.prop.B <- lx*wa
+init.prop.B <- (lx*wa)^-1
 #Standardize
 init.prop.B <- init.prop.B/sum(init.prop.B)
 
+bo/wa[1,1]
 
 #This should be updated
 
@@ -207,36 +208,7 @@ N[,1,] <- B[,1,] /wa
 
 
 #Calculate equilibrium recruitment
-# fx <- get_fished_survivorship(halibut, F_eq=apply(fmort, 2, mean))
-# 
-# phi.e <- sum(fx*fa)
-# 
-# 
-# ro_fished <- log(bo/phi.e)
-# 
-# ro <- halibut$ageSc$ro
-# 
-# temp <- array(dim=c(n.sex,n.age))
-# 
-# s <- 1
-# for(s in 1:n.sex) {
-#   a <- 1
-#   for(a in ages) {
-#     if(a == min(age)) {
-#       temp[s,a] <- exp(ro)
-#     } else {
-#       temp[s,a] <- exp(ro)*exp(-sum(mx[s,(1:(a-1))]))
-#     }
-#     if(a == A) {
-#       temp[s,a] <- temp[s,a] / (1-exp(-mx[s,a]  ))
-#     }
-#   }#next age
-# }#next sex
-# 
-# B[,1,] <- temp[s,a]
-# N[,1,] <- B[,1,] /wa
-# 
-# log(bo/sum(lx*fa))
+
 
 ##################################################
 #BEGIN SIMULATION
@@ -249,12 +221,12 @@ y <- 2
 for(y in 2:n.year) {
   
   #Initial Recruitment
-  ssb[y-1] <- sum(fa*N[,y-1,])
+  ssb[,,y-1] <- fa*N[,y-1,]
   
   #Ricker
-  # rec[,y] <- ssb[y]*exp(1.25*log(5*h)*(1-(ssb[y]/bo)))
+  # rec[,y-1] <- 0.5 * ricker_recruit(ssb[y-1], steep, bo)
   #Beverton-Holt
-  rec[,y-1] <- 0.5 * beverton_holt_recruit(ssb[y-1], steep, bo) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1] <- 0.5 * beverton_holt_recruit(sum(ssb[,,y-1]), steep, bo) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
   for(a in 1:n.age) {
     #Update Numbers and Biomass Matrix
@@ -326,19 +298,42 @@ dim(C.n)
 dim(C.b)
 
 
+#Plotting ssb
+list.ssb <- melt(ssb)
+names(list.ssb) <- c('Sex', 'Age', 'Year', 'value')
 
+g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
+       theme_gray() +
+       geom_area() + 
+       scale_fill_gradient2(midpoint=plus.age/2, low='blue', mid='yellow', high='red') +
+       labs(y='Spawning Stock Biomass (lbs)')   
+# scale_fill_brewer(palette="RdYlGn")
+g
+
+g <- list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE)) %>% ggplot() + aes(x=Year, y=total, fill=Sex, group=Sex) + geom_line()
+
+
+
+#Plotting abundance
 dim(N)
 
 list.N <- melt(N)
 names(list.N) <- c('Sex', 'Year', 'Age', 'value')
+# list.N$Age <- as.factor(list.N$Age)
 
-g <- ggplot(list.N, aes(x=Year, y=value, color=Age, group=Age)) +
+g <- ggplot(list.N, aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
       theme_gray() +
-      geom_line() + 
-      facet_wrap(~Sex, ncol=1)
+      geom_area() + 
+      facet_wrap(~Sex, ncol=1) +
+      scale_fill_gradient2(midpoint=plus.age/2, low='blue', mid='yellow', high='red') +
+      labs(y='Abundance (millions)')   
+      # scale_fill_brewer(palette="RdYlGn")
 
 g
 
+#Recruitment Plot
+
+g.rec <- ggplot()
 
 
 
