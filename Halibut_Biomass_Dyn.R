@@ -100,6 +100,7 @@ halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
 in.rec <- read.xlsx2('Halibut Model Inputs.xlsx', sheetName='Recruitment', stringsAsFactors=FALSE)
 halibut$rec$steep <- as.numeric(in.rec$Value[in.rec$Par=='steep'])
 halibut$rec$sigma_rec <- as.numeric(in.rec$Value[in.rec$Par=='sigma_rec'])
+halibut$rec$ro  <- as.numeric(in.rec$Value[in.rec$Par=='ro'])
 
 #INPUT FISHING MORTALITY RATES
 fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
@@ -157,6 +158,7 @@ sexes <- c('Female','Male')
 #Recruitment
 steep <- halibut$rec$steep
 sigma_rec <- halibut$rec$sigma_rec
+ro <- halibut$rec$ro
 bo <- halibut$theta$bo*1e6
 
 
@@ -192,22 +194,40 @@ rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
 #Define initial population structure based on equilibirum conditions
 
 #Calculate expected biomass proportions by weight
-init.prop.B <- (lx*wa)^-1
-#Standardize
-init.prop.B <- init.prop.B/sum(init.prop.B)
-
-bo/wa[1,1]
+# init.prop.B <- (lx*wa)^-1
+# #Standardize
+# init.prop.B <- init.prop.B/sum(init.prop.B)
+# 
+# bo/wa[1,1]
 
 #This should be updated
+init.prop <- vector(length=n.age)
+for(a in 1:n.age) {
+  if(a==1) {
+    init.prop[a] <- bo*mx[1,a]
+  }else {
+    init.prop[a] <- bo*exp(-(a-1)*mx[1,a])
+  }
+  if(a==plus.age) {
+    init.prop[a] <- init.prop[a]/(1-exp(-mx[1,a]))
+  }
+}
+#Multiply by spawning sbpr @ age
+init.prop <- init.prop
+init.prop <- init.prop/sum(init.prop)
+
+
 
 #Initial Biomass
-B[,1,] <- Bstart*1e6 * init.prop.B
+B[,1,] <- Bstart*1e6 * init.prop
 
 #Initial Numbers of Individuals
 N[,1,] <- B[,1,] /wa
 
 
 #Calculate equilibrium recruitment
+
+
 
 
 ##################################################
@@ -226,7 +246,7 @@ for(y in 2:n.year) {
   #Ricker
   # rec[,y-1] <- 0.5 * ricker_recruit(ssb[y-1], steep, bo)
   #Beverton-Holt
-  rec[,y-1] <- 0.5 * beverton_holt_recruit(sum(ssb[,,y-1]), steep, bo) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1] <-  0.5 * beverton_holt_recruit(sum(ssb[,,y-1]), steep, ro)#bo) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
   for(a in 1:n.age) {
     #Update Numbers and Biomass Matrix
@@ -306,13 +326,13 @@ g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age
        theme_gray() +
        geom_area() + 
        scale_fill_gradient2(midpoint=plus.age/2, low='blue', mid='yellow', high='red') +
-       labs(y='Spawning Stock Biomass (lbs)')   
+       labs(y='Spawning Stock Biomass (millions of lbs)')   
 # scale_fill_brewer(palette="RdYlGn")
 g
 
-g <- list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE)) %>% ggplot() + aes(x=Year, y=total, fill=Sex, group=Sex) + geom_line()
+# g <- list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE)) %>% ggplot() + aes(x=Year, y=total, fill=Sex, group=Sex) + geom_line()
 
-
+list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE))
 
 #Plotting abundance
 dim(N)
