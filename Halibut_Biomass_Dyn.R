@@ -201,21 +201,27 @@ rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
 # bo/wa[1,1]
 
 #This should be updated
-init.prop <- vector(length=n.age)
+init.prop <- matrix(nrow=n.sex, ncol=n.age, dimnames=list(sexes,ages))
 for(a in 1:n.age) {
   if(a==1) {
-    init.prop[a] <- bo*mx[1,a]
+    init.prop[,a] <- bo*mx[,a]
   }else {
-    init.prop[a] <- bo*exp(-(a-1)*mx[1,a])
+    init.prop[,a] <- bo*exp(-(a-1)*mx[,a])
   }
   if(a==plus.age) {
-    init.prop[a] <- init.prop[a]/(1-exp(-mx[1,a]))
+    init.prop[,a] <- init.prop[,a]/(1-exp(-mx[,a]))
   }
 }
 #Multiply by spawning sbpr @ age
+# init.prop <- init.prop
 init.prop <- init.prop
-init.prop <- init.prop/sum(init.prop)
+for(s in 1:n.sex) {
+  init.prop[s,] <- init.prop[s,]/sum(init.prop[s,])
+}
 
+# lst <- melt(init.prop)
+# names(lst) <- c('Sex','Age','Prop')
+# ggplot(lst, aes(x=Age, y=Prop, color=Sex))+ geom_line() + geom_point(pch=21, fill='black') 
 
 
 #Initial Biomass
@@ -226,9 +232,12 @@ N[,1,] <- B[,1,] /wa
 
 
 #Calculate equilibrium recruitment
+sp <- seq(from=1, to=5e8, length.out=1e3)
+bh <- beverton_holt_recruit(sp, steep, 1e7)
+# rk <- ricker_recruit(sp, steep, 1e7)
 
-
-
+plot(bh~sp, type='l', col='blue')
+# lines(rk~sp, col='red')
 
 ##################################################
 #BEGIN SIMULATION
@@ -325,14 +334,15 @@ names(list.ssb) <- c('Sex', 'Age', 'Year', 'value')
 g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
        theme_gray() +
        geom_area() + 
-       scale_fill_gradient2(midpoint=plus.age/2, low='blue', mid='yellow', high='red') +
+       scale_fill_gradient2(midpoint=plus.age/2, low='darkblue', mid='green', high='red') +
        labs(y='Spawning Stock Biomass (millions of lbs)')   
 # scale_fill_brewer(palette="RdYlGn")
 g
 
 # g <- list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE)) %>% ggplot() + aes(x=Year, y=total, fill=Sex, group=Sex) + geom_line()
 
-list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% summarize(total=sum(value, na.rm=TRUE))
+list.ssb[list.ssb$Sex=='Female',] %>% group_by(Sex, Year) %>% 
+    summarize(total=sum(value, na.rm=TRUE), prop=(value/sum(value)))
 
 #Plotting abundance
 dim(N)
@@ -341,17 +351,41 @@ list.N <- melt(N)
 names(list.N) <- c('Sex', 'Year', 'Age', 'value')
 # list.N$Age <- as.factor(list.N$Age)
 
-g <- ggplot(list.N, aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
+g2 <- ggplot(list.N, aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
       theme_gray() +
       geom_area() + 
       facet_wrap(~Sex, ncol=1) +
-      scale_fill_gradient2(midpoint=plus.age/2, low='blue', mid='yellow', high='red') +
+      scale_fill_gradient2(midpoint=plus.age/2, low='darkblue', mid='green', high='red') +
       labs(y='Abundance (millions)')   
       # scale_fill_brewer(palette="RdYlGn")
 
-g
+g2
 
-#Recruitment Plot
+
+#Plotting abundance proportions
+list.N.prop <- data.frame(list.N %>% group_by(Sex, Year) %>% mutate(prop=value/sum(value)))
+
+g3 <- ggplot(list.N.prop[list.N.prop$Year<10,], aes(x=Year, y=prop, fill=Age, group=Age)) +
+        theme_gray() +
+        geom_area(alpha=0.75) +
+        facet_wrap(~Sex, ncol=1) +
+        scale_fill_gradient2(midpoint=plus.age/2, low='darkblue', mid='green', high='red') +
+        labs(y='Proportion of Total Abundance (N)') 
+g3
+
+list.b <- melt(B)
+names(list.b) <- c('Sex','Age','Year','value')
+
+list.B.prop <- data.frame(list.b %>% group_by(Sex, Year) %>% mutate(prop=value/sum(value)))
+
+g4 <- ggplot(list.B.prop, aes(x=Year, y=prop, fill=Age, group=Age)) +
+  theme_gray() +
+  geom_area(alpha=0.75) +
+  facet_wrap(~Sex, ncol=1) +
+  scale_fill_gradient2(midpoint=plus.age/2, low='darkblue', mid='green', high='red') +
+  labs(y='Proportion of Total Biomass (B)') 
+g4
+
 
 g.rec <- ggplot()
 
