@@ -61,66 +61,38 @@ require(R.utils)
 #Working Directory
 
 #Sources
-source('R/Halibut_Plot_Fxns.R')
+source('R/Halibut-Plot-Fxns.R')
 source('R/ricker-recruit.R')
 source('R/beverton-holt-recruit.R')
 source('R/get-fished-survivorship.R')
 
-source('R/fisheryFootprint_plus.R') #This is an updated version of Steve's functions
-source('R/read_update_params.R')
-
-#PRELIMINARY PLOTS
-# plot.landings(dpi=600)
-
-
-
-# #READ IN DATA from excel input file
-# load('data/halibut.rda')
-
-
+source('R/fisheryFootprint-plus.R') #This is an updated version of Steve's functions
+source('R/read-update-params.R')
+source('R/extract-params.R')
 
 #=============================================================
 ##### CONTROL SECTION #####
 do.init.plots <- FALSE
 
-halibut <- read_update_params(do.init.plots=TRUE)
+
 
 #=============================================================
-#Adjust halibut object values based on inputs from spreadsheet
-#Growth
-in.growth <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Growth')
-halibut$theta$linf <- as.numeric(in.growth[in.growth$Par=='linf',(2:3)])
-halibut$theta$vbk <- as.numeric(in.growth[in.growth$Par=='vbk',(2:3)])
-halibut$theta$to <- as.numeric(in.growth[in.growth$Par=='to',(2:3)])
-halibut$theta$a <- as.numeric(in.growth[in.growth$Par=='a',(2:3)])
-halibut$theta$b <- as.numeric(in.growth[in.growth$Par=='b',(2:3)])
-#Maturity
-in.maturity <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Maturity')
-halibut$theta$ahat <- as.numeric(in.maturity[in.maturity$Par=='ahat',(2:3)])
-halibut$theta$ghat <- as.numeric(in.maturity[in.maturity$Par=='ghat',(2:3)])
-#Mortality
-in.mortality <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Mortality')
-halibut$theta$m <- as.numeric(in.mortality[in.mortality$Par=='m',(2:3)])
-halibut$theta$A <- max(in.mortality[in.mortality$Par=='A',2:3])
-#Fishery Selectivity
-in.selex <- read.xlsx2('Halibut Model Inputs.xlsx', sheetName='FisherySelectivity', stringsAsFactors=FALSE, header=TRUE)
-halibut$MP$slx1 <- as.numeric(in.selex[in.selex$Par=='mu',c(2:5)])
-halibut$MP$slx2 <- as.numeric(in.selex[in.selex$Par=='sigma',c(2:5)])
-halibut$MP$slx3 <- as.numeric(in.selex[in.selex$Par=='gamma',c(2:5)])
-halibut$MP$slx4 <- as.numeric(in.selex[in.selex$Par=='plus.age',c(2:5)])  #Plus group age for selectivity
-halibut$MP$slim <- as.numeric(in.selex[in.selex$Par=='slim',c(2:5)])  #Minimum size for retention
-halibut$MP$ulim <- as.numeric(in.selex[in.selex$Par=='ulim',c(2:5)])  #Maximum size for retention
-halibut$MP$dmr <- as.numeric(in.selex[in.selex$Par=='dmr',c(2:5)])  #Discard Mortality Rate
-# halibut$MP$pscLimit <- as.numeric(in.selex[in.selex$Par=='pscLimit',c(2:5)])  #Prohibited species catch limit
-halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
-halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
-halibut$MP$pYPR <- as.numeric(in.selex[in.selex$Par=='pYPR',c(2:5)])
+#1) Adjust halibut object values based on inputs from spreadsheet
+#2) Calculate survival/growth by age
+#3) Calculate selectivity by age
+halibut <- read_update_params()
 
-#Recruitment Parameter Inputs
-in.rec <- read.xlsx2('Halibut Model Inputs.xlsx', sheetName='Recruitment', stringsAsFactors=FALSE)
-halibut$rec$steep <- as.numeric(in.rec$Value[in.rec$Par=='steep'])
-halibut$rec$sigma_rec <- as.numeric(in.rec$Value[in.rec$Par=='sigma_rec'])
-halibut$rec$ro  <- as.numeric(in.rec$Value[in.rec$Par=='ro'])
+#=========================================
+if(do.init.plots==TRUE) {
+  #PRELIMINARY PLOTS
+  plot.landings(dpi=600)
+  plot.growth_allometry(ageSchedules=halibut, dpi=500)
+  plot.selectivity(selectivity=halibut, dpi=500, pt.blk=FALSE)
+}
+
+#=========================================
+#Extract variables
+
 
 #INPUT FISHING MORTALITY RATES
 fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
@@ -131,24 +103,7 @@ n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 years <- 1:n.year
 Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
-#=========================================
-halibut <- getSelectivities(halibut)
-#Determine Age Schedules
-# ageSchedules <- getAgeSchedules(halibut)
-#Plot Age Schedule
-if(do.init.plots==TRUE) { plot.growth_allometry(ageSchedules=halibut, dpi=500) }
-#
 
-#=========================================
-#Determine Selectivities
-# selectivity <- getSelectivities(halibut)
-
-if(do.init.plots==TRUE) { plot.selectivity(selectivity=halibut, dpi=500, pt.blk=FALSE) }
-
-
-
-#=========================================
-#Extract variables
 n.age  <- halibut$theta$A
 n.gear <- dim(halibut$MP)[1]
 n.sex  <- halibut$theta$H
@@ -182,6 +137,7 @@ sigma_rec <- halibut$rec$sigma_rec
 ro <- halibut$rec$ro
 bo <- halibut$theta$bo*1e6
 
+#=========================================
 
 lz  <- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
 za  <- matrix(0,nrow=n.sex,ncol=n.age)
@@ -254,11 +210,11 @@ N[,1,] <- B[,1,] /wa
 
 
 #Calculate equilibrium recruitment
-sp <- seq(from=1, to=5e8, length.out=1e3)
-bh <- beverton_holt_recruit(sp, steep, 1e7)
-# rk <- ricker_recruit(sp, steep, 1e7)
-
-plot(bh~sp, type='l', col='blue')
+# sp <- seq(from=1, to=5e8, length.out=1e3)
+# bh <- beverton_holt_recruit(sp, steep, 1e7)
+# # rk <- ricker_recruit(sp, steep, 1e7)
+# 
+# plot(bh~sp, type='l', col='blue')
 # lines(rk~sp, col='red')
 
 ##################################################
@@ -307,10 +263,12 @@ for(y in 2:n.year) {
         g <- 1
         for(g in 1:n.gear) {
           temp.F <- fmort[y-1,g]*va[h,a-1,g]
-          temp.Z <- temp.F + mx[h,a-1]
+          # temp.Z <- temp.F + mx[h,a-1]
+          temp.Z <- sum(fmort[y-1,]*va[h,a-1,]) + mx[h,a-1]
+          
           # harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (F.a[h,y-1,a-1]/Z.a[h,y-1,a-1]) * (1-exp(-1*Z.a[h,y-1,a-1]))
           harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
-          harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (va[h,a-1,g] * (1-exp(-1*(mx[h,a-1]*Z.a[h,y-1,a-1])))) /(Z.a[h,y-1,a-1])
+          # harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (va[h,a-1,g] * (1-exp(-1*(mx[h,a-1]*Z.a[h,y-1,a-1])))) /(Z.a[h,y-1,a-1])
           
           harvest.b[h,y-1,a-1,g] <- harvest.n[h,y-1,a-1,g] * wa[h,a-1]
         }#next gear
@@ -339,7 +297,9 @@ for(y in 2:n.year) {
         g <- 1
         for(g in 1:n.gear) {
           temp.F <- fmort[y-1,g]*va[h,a,g]
-          temp.Z <- temp.F + mx[h,a]
+          # temp.Z <- temp.F + mx[h,a]
+          temp.Z <- sum(fmort[y-1,]*va[h,a,]) + mx[h,a]
+          # 
           harvest.n[h,y-1,a,g] <- N[h,y-1,a] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
           harvest.b[h,y-1,a,g] <- harvest.n[h,y-1,a,g] * wa[h,a]
         }#next gear
