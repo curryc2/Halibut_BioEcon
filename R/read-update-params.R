@@ -1,12 +1,10 @@
 #' Read in and update halibut life history parameters form .xlsx. 
 #'   Calculate size, mortality, and selectivity parameters at age, given sex and gear type. 
 #'
-#' @param do.init.plots Boolean for whether to generate figures describing 
-#'
 #' @return halibut a list including all available growth, mortality, selectivity information for the simulated stock. 
 #' @export
 #'
-read_update_params <- function(do.init.plots=FALSE) {
+read_update_params <- function() {
   
   load('data/halibut.rda')
   #=============================================================
@@ -46,27 +44,8 @@ read_update_params <- function(do.init.plots=FALSE) {
   halibut$rec$sigma_rec <- as.numeric(in.rec$Value[in.rec$Par=='sigma_rec'])
   halibut$rec$ro  <- as.numeric(in.rec$Value[in.rec$Par=='ro'])
   
-  #INPUT FISHING MORTALITY RATES
-  fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
-  
-  #Input control parameters
-  in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
-  n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
-  years <- 1:n.year
-  Bstart <- in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
-  
   #=========================================
   halibut <- getSelectivities(halibut)
-  #Determine Age Schedules
-  # ageSchedules <- getAgeSchedules(halibut)
-  #Plot Age Schedule
-  if(do.init.plots==TRUE) { plot.growth_allometry(ageSchedules=halibut, dpi=500) }
-  #
-  
-  #=========================================
-  #Determine Selectivities
-  # selectivity <- getSelectivities(halibut)
-  
-  if(do.init.plots==TRUE) { plot.selectivity(selectivity=halibut, dpi=500, pt.blk=FALSE) }
+
   return(halibut)
 }
