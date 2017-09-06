@@ -9,7 +9,7 @@
 #' @return A vector of catches in biomass or numbers, for each of four fishing sectors
 #' @export
 #'
-F_to_C <- function(F.input, N.input,  Catch.biom=TRUE, halibut=halibut) {
+F_to_C <- function(F.input, N.input,  Catch.biom=TRUE, ...) {
   # ### TESTING ###
   # F.input <- c(0.1,0.05,0.01,0.01)
   # N.input <- N[,5,]
@@ -40,4 +40,4 @@ F_to_C <- function(F.input, N.input,  Catch.biom=TRUE, halibut=halibut) {
   return(output)
 }
 
-# F_to_C(F.input=c(0.2,0.1,0.05,0), N.input=N[,5,], Catch.biom=TRUE, halibut=halibut)
+# F_to_C(F.input=c(0.2,0.1,0.05,0), N.input=N[,5,], Catch.biom=TRUE)
