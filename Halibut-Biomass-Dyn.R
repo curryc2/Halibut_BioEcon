@@ -57,6 +57,7 @@ require(reshape2)
 require(xlsx)
 require(corrplot)
 require(R.utils)
+require(ggthemes)
 
 #Working Directory
 
@@ -316,7 +317,7 @@ dim(C.b)
 
 
 #Total Biomass plot
-#Unfished Biomass is coastise 709 million lbs
+#Unfished Biomass is coastwide 709 million lbs
 list.B <- melt(B) 
 names(list.B) <- c('Sex','Year','Age','value')
 
