@@ -18,9 +18,6 @@ extract_params <- function(halibut) {
   probCap <- as.array(halibut$probCap) #Probability of capture @ age
   probRetain <- as.array(halibut$probRetain)
   
-  wa <- halibut$ageSc$wa #Weight @ age
-  fa <- halibut$ageSc$fa #Female spawning biomass @ age
-  
   #Age Schedule stuff
   mx <- halibut$ageSc$mx  #Natural mortality @ age
   la <- halibut$ageSc$la  #Length @ age
@@ -40,4 +37,14 @@ extract_params <- function(halibut) {
   ro <- halibut$rec$ro
   bo <- halibut$theta$bo*1e6
   
+  
+  #Return Section
+  out <- list(c(n.age=n.age, n.gear=n.gear, n.sex=n.sex,
+                  va=va, gears=gears, probCap=probCap, probRetain=probRetain,
+                  mx=mx, la=la, wa=wa, ma=ma, fa=fa, lx=lx,
+                  ages=ages, plus.age=plus.age, sexes=sexes,
+                  steep=steep, sigma_rec=sigma_rec, ro=ro, bo=bo))
+  
+  return(out)
 }
+# out <- extract_params(halibut)
