@@ -70,6 +70,7 @@ source('R/get-fished-survivorship.R')
 source('R/fisheryFootprint-plus.R') #This is an updated version of Steve's functions
 source('R/read-update-params.R')
 source('R/extract-params.R')
+source('R/HCR/HCR-linear.R')
 
 #=============================================================
 ##### CONTROL SECTION #####
@@ -91,7 +92,7 @@ if(do.init.plots==TRUE) {
 
 #=========================================
 #Extract variables
-
+extract_params(halibut)
 
 #INPUT FISHING MORTALITY RATES
 fmort <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Fmort')[,-1]
@@ -114,8 +115,8 @@ gears <- as.vector(halibut$MP$sector)
 probCap <- as.array(halibut$probCap) #Probability of capture @ age
 probRetain <- as.array(halibut$probRetain)
 
-wa <- halibut$ageSc$wa #Weight @ age
-fa <- halibut$ageSc$fa #Female spawning biomass @ age
+# wa <- halibut$ageSc$wa #Weight @ age
+# fa <- halibut$ageSc$fa #Female spawning biomass @ age
 
 #Age Schedule stuff
 mx <- halibut$ageSc$mx  #Natural mortality @ age

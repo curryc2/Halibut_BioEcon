@@ -39,7 +39,7 @@ HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.
   }
   
   if(plot==TRUE) {
-    sim.ratio <- seq(0,1, length.out=100)
+    sim.ratio <- seq(0,max(1,ratio.SSB), length.out=100)
     n.sim <- length(sim.ratio)
     sim.F <- vector(length=n.sim)
     
@@ -58,23 +58,20 @@ HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.
     }#next s
     
     #Plotting Section
-    if(plot==TRUE) {
-      plot(x=NULL, y=NULL, xlim=c(min(sim.ratio), max(sim.ratio)), ylim=c(0, 1.1*max(sim.F)),
-             xlab='SSB Ratio', ylab='Fishing Mortality Rate (F)', main='Linear HCR')
-      polygon(x=c(0, min(ascent.range), min(ascent.range), 0), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
-                col='red', border=FALSE)
-      polygon(x=c(min(ascent.range), max(ascent.range), max(ascent.range), min(ascent.range)), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
-                col='yellow', border=FALSE)
-      polygon(x=c(max(ascent.range), 1, 1, max(ascent.range)), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
-              col='green', border=FALSE)
-      #Harvest Control Rule
-      lines(x=sim.ratio, y=sim.F, lwd=4, col='darkblue')
-      #Current
-      segments(x0=ratio.SSB, y0=-10, x1=ratio.SSB, y1=curr.F, lty=3, lwd=2, col='darkgray')
-      segments(x0=-10, y0=curr.F, x1=ratio.SSB, y1=curr.F, lty=3, lwd=2, col='darkgray')
-      points(x=ratio.SSB, y=curr.F, pch=21, bg='darkgray', cex=1.25)
-    }
+    plot(x=NULL, y=NULL, xlim=c(min(sim.ratio), max(sim.ratio)), ylim=c(0, 1.1*max(sim.F)),
+           xlab='SSB Ratio', ylab='Fishing Mortality Rate (F)', main='Linear HCR')
+    polygon(x=c(0, min(ascent.range), min(ascent.range), 0), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
+              col='red', border=FALSE)
+    polygon(x=c(min(ascent.range), max(ascent.range), max(ascent.range), min(ascent.range)), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
+              col='yellow', border=FALSE)
+    polygon(x=c(max(ascent.range), 1, 1, max(ascent.range)), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
+            col='green', border=FALSE)
+    #Harvest Control Rule
+    lines(x=sim.ratio, y=sim.F, lwd=5, col='blue')
+    #Current
+    segments(x0=ratio.SSB, y0=-10, x1=ratio.SSB, y1=curr.F, lty=3, lwd=2, col='black')
+    segments(x0=-10, y0=curr.F, x1=ratio.SSB, y1=curr.F, lty=3, lwd=2, col='black')
+    points(x=ratio.SSB, y=curr.F, pch=21, bg='gray', cex=1.25)
   }
-  
   return(curr.F)  
 }
