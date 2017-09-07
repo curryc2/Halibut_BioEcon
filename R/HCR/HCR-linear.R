@@ -1,3 +1,15 @@
+#' Harvest Control Rule: Basic linear increase
+#'
+#' @param curr.SSB Current spawning stock biomass 
+#' @param SSB0 Equilibrium spawning stock biomass
+#' @param floor.F Fishing mortality rate floor for HCR
+#' @param ceiling.F Fishing mortality rate ceiling for HCR
+#' @param ascent.range Vector of length 2, describing the 1. lower and 2. upper range of the ascending region of HCR
+#' @param plot Boolean for whether to plot HCR example
+#'
+#' @return
+#' @export
+#'
 HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.4), plot=FALSE) {
   
   ### TESTING
