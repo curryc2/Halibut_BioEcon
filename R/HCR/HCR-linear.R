@@ -25,16 +25,16 @@ HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.
   
   #Calculate SSB ration
   ratio.SSB <- curr.SSB/SSB0
-  slope <- (ceiling-floor)/(ascent.range[2]-ascent.range[1])
+  slope <- (ceiling.F-floor.F)/(ascent.range[2]-ascent.range[1])
   
   if(ratio.SSB>ascent.range[2]) {
-    curr.F <- ceiling
+    curr.F <- ceiling.F
   }else {
     if(ratio.SSB<ascent.range[1]) {
-      curr.F <- floor
+      curr.F <- floor.F
     }else {
       #ACTION ZONE
-      curr.F <- floor + slope * (ratio.SSB - ascent.range[1])
+      curr.F <- floor.F + slope * (ratio.SSB - ascent.range[1])
     }
   }
   
@@ -46,13 +46,13 @@ HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.
     s <- 1
     for(s in 1:n.sim) {
       if(sim.ratio[s]>ascent.range[2]) {
-        sim.F[s] <- ceiling
+        sim.F[s] <- ceiling.F
       }else {
         if(sim.ratio[s]<ascent.range[1]) {
-          sim.F[s] <- floor
+          sim.F[s] <- floor.F
         }else {
           #ACTION ZONE
-          sim.F[s] <- floor + slope * (sim.ratio[s] - ascent.range[1])
+          sim.F[s] <- floor.F + slope * (sim.ratio[s] - ascent.range[1])
         }
       }
     }#next s
