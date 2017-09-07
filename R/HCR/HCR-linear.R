@@ -2,12 +2,12 @@ HCR_linear <- function(curr.SSB, SSB0, floor.F, ceiling.F, ascent.range=c(0.2,0.
   
   ### TESTING
   
-  curr.SSB <- 3e5
-  SSB0 <- 1e6
-  floor <- 0
-  ceiling <- 0.8
-  ascent.range=c(0.2,0.4)
-  plot=TRUE
+  # curr.SSB <- 3e5
+  # SSB0 <- 1e6
+  # floor <- 0
+  # ceiling <- 0.8
+  # ascent.range=c(0.2,0.4)
+  # plot=TRUE
   
   ###
   
