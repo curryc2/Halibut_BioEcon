@@ -39,12 +39,33 @@ extract_params <- function(halibut) {
   
   
   #Return Section
-  out <- list(c(n.age=n.age, n.gear=n.gear, n.sex=n.sex,
-                  va=va, gears=gears, probCap=probCap, probRetain=probRetain,
-                  mx=mx, la=la, wa=wa, ma=ma, fa=fa, lx=lx,
-                  ages=ages, plus.age=plus.age, sexes=sexes,
-                  steep=steep, sigma_rec=sigma_rec, ro=ro, bo=bo))
+  # out <- list(c(n.age=n.age, n.gear=n.gear, n.sex=n.sex,
+  #                 va=va, gears=gears, probCap=probCap, probRetain=probRetain,
+  #                 mx=mx, la=la, wa=wa, ma=ma, fa=fa, lx=lx,
+  #                 ages=ages, plus.age=plus.age, sexes=sexes,
+  #                 steep=steep, sigma_rec=sigma_rec, ro=ro, bo=bo))
   
+  out <- NULL
+  out$n.age=n.age
+  out$n.gear=n.gear
+  out$n.sex=n.sex
+  out$va=va
+  out$gears=gears
+  out$probCap=probCap
+  out$probRetain=probRetain
+  out$mx=mx
+  out$la=la
+  out$wa=wa
+  out$ma=ma
+  out$fa=fa
+  out$lx=lx
+  out$ages=ages
+  out$plus.age=plus.age
+  out$sexes=sexes
+  out$steep=steep
+  out$sigma_rec=sigma_rec
+  out$ro=ro
+  out$bo=bo
   return(out)
 }
 # out <- extract_params(halibut)
