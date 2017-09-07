@@ -14,6 +14,16 @@ F-to-C.R                                   | Calculates catch by fishing sector 
 read-update-params.R                       | Function that reads in parameter values from Halibut Model Inputs.xlsx, and updates life history and selectivity parameters in the halibut object. 
 extract-params.R                           | Function to extract and rename parameters from the Halibut object for use in the bio-fishery simulation framework.
 create-sim-objects.R                       | Function to create data objects for simulation.              
+calc-init-age-prop.R                       | Function to calculate initial sex-specific proportions of biomass at age, based on unfished equilibrium
+
+
+***
+### Harvest Control Rule Options
+
+Script Name                                | Control Rule
+-------------------------------------------|-----------------------------------------
+HCR-linear.R                               | Sloping linear control rule with specified floor, ceiling, and transition zone.
+HCR-threshold.R                            | Threshold harvest control rule, with specified floor and ceiling.
 
 Credit:
 =============
