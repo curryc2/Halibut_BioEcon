@@ -75,8 +75,6 @@ source('R/extract-params.R')
 ##### CONTROL SECTION #####
 do.init.plots <- FALSE
 
-
-
 #=============================================================
 #1) Adjust halibut object values based on inputs from spreadsheet
 #2) Calculate survival/growth by age
@@ -182,7 +180,7 @@ rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
 init.prop <- matrix(nrow=n.sex, ncol=n.age, dimnames=list(sexes,ages))
 for(a in 1:n.age) {
   if(a==1) {
-    init.prop[,a] <- bo*mx[,a]
+    init.prop[,a] <- bo#*mx[,a]
   }else {
     init.prop[,a] <- bo*exp(-(a-1)*mx[,a])
   }
@@ -207,7 +205,7 @@ init.prop <- init.prop/sum(init.prop)
 B[,1,] <- Bstart*1e6 * (init.prop)
 
 #Initial Numbers of Individuals
-N[,1,] <- B[,1,] /wa
+N[,1,] <- B[,1,] / wa
 
 
 #Calculate equilibrium recruitment
@@ -314,7 +312,6 @@ for(y in 2:n.year) {
 #Some Exploratory Plotting
 dim(C.n)
 dim(C.b)
-
 
 #Total Biomass plot
 #Unfished Biomass is coastwide 709 million lbs
@@ -437,95 +434,5 @@ g.7 <- ggplot(harv.b.list, aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
   labs(y='Total Catch (millions of lbs)') 
 
 g.7
-
-
-
-harv.b.total <- melt(apply())
-
-
-# Survivorship under fished conditions at fstar
-fbar <- 0.1#HP$fstar
-lambda <- rep(1.0,length=n.gear)
-iter <- 1
-for(iter in 1:(n.gear+1))
-{
-  # total mortality and survival rates
-  fe <- fbar * lambda
-  # browser()
-  for(h in 1:n.sex)
-  {
-    # print(fe)
-    if(dim(va)[3] > 1){
-      fage   <- rowSums(fe*va[h,,])
-    }
-    else if(dim(va)[3] == 1){
-      fage   <- fe * va[h,,]
-    }
-    za[h,] <- mx[h,] + fage #Total instantaneous mortality at age
-  }
-  sa <- exp(-za)
-  oa <- 1.0 - sa
-  
-  # per recruit yield & numbers for gear k
-  for(k in 1:n.gear)
-  {
-    pa[,,k] <- va[,,k] * oa / za
-    qa[,,k] <- va[,,k] * wa * oa / za
-    ra[,,k] <- va[,,k] * fa * oa / za
-  }
-  
-  #  survivorship
-  for(j in 2:nage)
-  {
-    lz[,j] <- lz[,j-1] * sa[,j-1]
-    if(j == nage)
-    {
-      lz[,j] <- lz[,j] / oa[,j]
-    }
-    
-    # partial derivatives
-    # for(k in 1:n.gear)
-    # {
-    # 	dlz[,j,k] <- sa[,j-1]*(dlz[,j-1,k]-lz[,j-1]*va[,j-1,k])
-    # 	if(j == A)
-    # 	{
-    # 		dlz[,j,k] <- dlz[,j,k]/oa[,j] - lz[,j-1]*sa[,j-1]*va[,j,k]*sa[,j]/oa[,j]^2
-    # 	}
-    # }
-  }
-  
-  
-  # Fmultipliers for fstar based on allocations
-  qp    <- switch(HP$type,YPR=qa,MPR=pa,FPR=ra)
-  ak    <- switch(HP$type,YPR=MP$pYPR,MPR=MP$pMPR,FPR=MP$pFPR)
-  phi.t <- 0
-  for(h in 1:nsex)
-  {
-    phi.t <- phi.t + as.vector(lz[h,] %*% qp[h,,])
-    # phi.t <- phi.t + as.vector((lz[h,]*fa[h,]) %*% qp[h,,])
-  }
-  
-  
-  lam.t  <- ak / (phi.t/sum(phi.t))
-  lambda <- lam.t / sum(lam.t)
-  # cat(iter," lambda = ",lambda,"\n")
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
