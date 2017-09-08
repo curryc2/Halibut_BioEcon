@@ -24,7 +24,7 @@ HCR_threshold <- function(curr.SSB, SSB0, floor.F, ceiling.F, threshold=0.4, plo
     
     #Plotting Section
     plot(x=NULL, y=NULL, xlim=c(min(sim.ratio), max(sim.ratio)), ylim=c(0, 1.1*max(sim.F)),
-         xlab='SSB Ratio', ylab='Fishing Mortality Rate (F)', main='Linear HCR')
+         xlab='SSB Ratio', ylab='Fishing Mortality Rate (F)', main='Threshold HCR')
     polygon(x=c(0, threshold, threshold, 0), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 
             col='red', border=FALSE)
     polygon(x=c(threshold, 1, 1, threshold), y=c(0,0,1.5*max(sim.F),1.5*max(sim.F)), 

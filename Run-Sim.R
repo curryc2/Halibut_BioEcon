@@ -82,12 +82,12 @@ n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 years <- 1:n.year
 Bstart <- 700#in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
-SSB0 <- 709e6 #720 million lbs from 2013 RARA
+SSB0 <- 709e6 #709 million lbs from 2013 RARA
 
 #For Harvest Control Rules
 floors <- rep(0,4)
-ceilings <- rep(0,4)#c(0.1,0.05,0.01,0.01)
-
+ceilings <- rep(0.4,4)#c(0.1,0.05,0.01,0.01)
+ascent.range <- c(0.2,0.4)
 #=============================================================
 #1) Adjust halibut object values based on inputs from spreadsheet
 #2) Calculate survival/growth by age
@@ -97,7 +97,6 @@ halibut <- read_update_params()
 #=============================================================
 #Extract variables
 params <- extract_params(halibut)
-
 attach(params)
 
 #=============================================================
@@ -128,7 +127,7 @@ for(y in 2:n.year) {
   g <- 1
   for(g in 1:n.gear) {
     temp.fmort[g] <- HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
-                                  ascent.range=c(0.2,0.4), plot=FALSE)
+                                  ascent.range=ascent.range, plot=FALSE)
   }#next g
   
   #Ricker
@@ -241,4 +240,13 @@ g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age
   geom_hline(yintercept=SSB.2017, lty=2, col='black', show.legend=TRUE)
 # scale_fill_brewer(palette="RdYlGn")
 g
+
+
+#Detatching section
+detach(objs)
+detach(params)
+# detach(ageSc)
+# detach(halibut)
+
+
 
