@@ -86,7 +86,7 @@ SSB0 <- 709e6 #709 million lbs from 2013 RARA
 
 #For Harvest Control Rules
 floors <- rep(0,4)
-ceilings <- rep(0.4,4)#c(0.1,0.05,0.01,0.01)
+ceilings <- rep(0.7,4)#c(0.1,0.05,0.01,0.01)
 ascent.range <- c(0.2,0.4)
 #=============================================================
 #1) Adjust halibut object values based on inputs from spreadsheet
