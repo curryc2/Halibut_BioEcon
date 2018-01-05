@@ -75,12 +75,14 @@ source('R/HCR/HCR-linear.R')
 
 source('R/calc-init-age-prop.R')
 
+
+
 #=============================================================
 ##### CONTROL SECTION #####
 in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
 n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 years <- 1:n.year
-Bstart <- 700#in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
+Bstart <- 500 #700#in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
 SSB0 <- 709e6 #709 million lbs from 2013 RARA
 
@@ -97,15 +99,16 @@ halibut <- read_update_params()
 #=============================================================
 #Extract variables
 params <- extract_params(halibut)
-attach(params)
+if(!"params" %in% search()) { attach(params) }
 
 #=============================================================
 #Create data objects for simulation
 objs <- create_sim_objects()
-attach(objs)
+if(!"objs" %in% search()) { attach(objs) }
 
 #=============================================================
 #Initialize Population (year 1)
+#   Should probably update to start from FISHED equilibrium
 init.prop <- calc_init_age_prop()
 B[,1,] <- Bstart*1e6 * (init.prop)
 N[,1,] <- B[,1,] / wa
@@ -126,8 +129,8 @@ for(y in 2:n.year) {
   temp.fmort <- vector(length=n.gear)
   g <- 1
   for(g in 1:n.gear) {
-    temp.fmort[g] <- HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
-                                  ascent.range=ascent.range, plot=FALSE)
+    temp.fmort[g] <- 0.1#HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
+                                  # ascent.range=ascent.range, plot=FALSE)
   }#next g
   
   #Ricker
