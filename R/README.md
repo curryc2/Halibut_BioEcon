@@ -15,7 +15,7 @@ read-update-params.R                       | Function that reads in parameter va
 extract-params.R                           | Function to extract and rename parameters from the Halibut object for use in the bio-fishery simulation framework.
 create-sim-objects.R                       | Function to create data objects for simulation.              
 calc-init-age-prop.R                       | Function to calculate initial sex-specific proportions of biomass at age, based on unfished equilibrium
-
+calc-SBpR.R                                | Function to calculate spawning biomass per recruit for harvest control rule calculations.
 
 ***
 ### Harvest Control Rule Options
