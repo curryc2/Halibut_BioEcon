@@ -109,6 +109,8 @@ if(!"objs" %in% search()) { attach(objs) }
 #=============================================================
 #Initialize Population (year 1)
 #   Should probably update to start from FISHED equilibrium
+
+
 init.prop <- calc_init_age_prop()
 B[,1,] <- Bstart*1e6 * (init.prop)
 N[,1,] <- B[,1,] / wa
