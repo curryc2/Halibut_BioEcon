@@ -1,4 +1,4 @@
-calc_SPR <- function() {
+calc_SBpR <- function() {
   
   
   
@@ -60,6 +60,6 @@ for(k in 1:ngear)
   qa[,,k] <- va[,,k] * wa * oa / za
   ra[,,k] <- va[,,k] * fa * oa / za
 }
-  output <- NULL
-  return(output)
+output <- NULL
+return(output)
 }
