@@ -127,7 +127,8 @@ for(i in 1:n.sims) {
 
 i <- 1
 for(i in 1:n.sims) {
-
+  print(paste('Sim:',i,'of',n.sims))
+  
   y <- 2
   for(y in 2:n.year) {
   
@@ -137,12 +138,24 @@ for(i in 1:n.sims) {
   
   #HARVEST CONTROL RULE
   temp.ssb <- sum(ssb[,,y-1,i])
-  #Fishing Sectors
-  temp.fmort <- vector(length=n.gear)
+  
+  #=============================================================
+  #### Conduct Assessment ####
+  
+  #1) Generate Index of Abundance from Survey
+  
+  #2) Call ADMB Model
+  
+  #=============================================================
+  #### Determine SPR ####
+  
+  #=============================================================
+  #### Set Harvest Limits ####
+  
   g <- 1
   for(g in 1:n.gear) {
-    temp.fmort[g] <- 0.01#HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
-                                  # ascent.range=ascent.range, plot=FALSE)
+    Fmort[g,y,i] <- HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
+                                  ascent.range=ascent.range, plot=FALSE)
   }#next g
   
   #Ricker
@@ -162,7 +175,7 @@ for(i in 1:n.sims) {
       h <- 1
       for(h in 1:n.sex) {
         #Instantaneous Version
-        F.a[h,y-1,a-1,i] <- sum(temp.fmort*va[h,a-1,])
+        F.a[h,y-1,a-1,i] <- sum(Fmort[,y,i]*va[h,a-1,])
         Z.a[h,y-1,a-1,i] <- F.a[h,y-1,a-1,i] + mx[h,a-1]  #Natural mortality is NOT time-varying
         
         #Continuous
@@ -171,7 +184,7 @@ for(i in 1:n.sims) {
         
         #Update
         
-        N[h,y,a,i] <- N[h,y-1,a-1]*surv[h,y-1,a-1,i]
+        N[h,y,a,i] <- N[h,y-1,a-1,i]*surv[h,y-1,a-1,i]
         # B[h,y,a,i] <- B[h,y-1,a-1,i]*surv[h,y-1,a-1,i]
         B[h,y,a,i] <- N[h,y,a,i]*wa[h,a]
         #Total Catch
@@ -180,9 +193,9 @@ for(i in 1:n.sims) {
         
         g <- 1
         for(g in 1:n.gear) {
-          temp.F <- temp.fmort[g]*va[h,a-1,g]
+          temp.F <- Fmort[g,y,i]*va[h,a-1,g]
           # temp.Z <- temp.F + mx[h,a-1]
-          temp.Z <- sum(temp.fmort*va[h,a-1,]) + mx[h,a-1]
+          temp.Z <- sum(Fmort[,y,i]*va[h,a-1,]) + mx[h,a-1]
           
           # harvest.n[h,y-1,a-1,g,i] <- N[h,y-1,a-1,i] * (F.a[h,y-1,a-1,i]/Z.a[h,y-1,a-1,i]) * (1-exp(-1*Z.a[h,y-1,a-1,i]))
           harvest.n[h,y-1,a-1,g,i] <- N[h,y-1,a-1,i] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
@@ -197,7 +210,7 @@ for(i in 1:n.sims) {
       h <- 1
       for(h in 1:n.sex) {
         #Fish in Plus Group
-        F.a[h,y-1,a,i] <- sum(temp.fmort*va[h,a,])
+        F.a[h,y-1,a,i] <- sum(Fmort[,y,i]*va[h,a,])
         Z.a[h,y-1,a,i] <- F.a[h,y-1,a,i] + mx[h,a]  #Natural mortality is NOT time-varying        
         
         #Continuous
@@ -214,9 +227,9 @@ for(i in 1:n.sims) {
         
         g <- 1
         for(g in 1:n.gear) {
-          temp.F <- temp.fmort[g]*va[h,a,g]
+          temp.F <- Fmort[g,y,i]*va[h,a,g]
           # temp.Z <- temp.F + mx[h,a]
-          temp.Z <- sum(temp.fmort*va[h,a,]) + mx[h,a]
+          temp.Z <- sum(Fmort[,y,i]*va[h,a,]) + mx[h,a]
           # 
           harvest.n[h,y-1,a,g,i] <- N[h,y-1,a,i] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
           harvest.b[h,y-1,a,g,i] <- harvest.n[h,y-1,a,g,i] * wa[h,a]
@@ -224,14 +237,20 @@ for(i in 1:n.sims) {
       }#next sex
     }# If plus age group
   }#next age  
+  
 }#next y
 
 }#next i
 
-list.B <- melt(B) 
-names(list.B) <- c('Sex','Year','Age','value')
 
-total.B <- list.B %>% group_by(Year, Age) %>% summarize(total=sum(value))
+
+#=============================================================
+#### Plotting Results ####
+
+list.B <- melt(B) 
+names(list.B) <- c('Sex','Year','Age','Sim','value')
+
+total.B <- list.B %>% subset(Sim=='sim1') %>% group_by(Year, Age) %>% summarize(total=sum(value))
 
 gt <- ggplot(total.B, aes(x=Year, y=total/1e6, fill=Age, group=Age)) + 
   theme_gray() + 
@@ -242,13 +261,13 @@ gt
 
 #Plotting ssb
 list.ssb <- melt(ssb)
-names(list.ssb) <- c('Sex', 'Age', 'Year', 'value')
+names(list.ssb) <- c('Sex', 'Age', 'Year', 'Sim', 'value')
 
 
 SSB.eq <- 709
 SSB.2017 <- 212
 
-g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
+g <- ggplot(list.ssb[list.ssb$Sex=='Female' & list.ssb$Sim=='sim1',], aes(x=Year, y=value/1e6, fill=Age, group=Age)) +
   theme_gray() +
   geom_area(alpha=0.75) + 
   scale_fill_gradient2(midpoint=plus.age/2, low='darkblue', mid='green', high='red') +
@@ -258,6 +277,10 @@ g <- ggplot(list.ssb[list.ssb$Sex=='Female',], aes(x=Year, y=value/1e6, fill=Age
 # scale_fill_brewer(palette="RdYlGn")
 g
 
+#Plot 
+
+#=============================================================
+#### DETACHING SECTION ####
 
 #Detatching section
 detach(objs)
