@@ -82,6 +82,9 @@ source('R/calc-init-age-prop.R')
 in.control <- read.xlsx('Halibut Model Inputs.xlsx', sheetName='Control')
 n.year <- in.control$Value[in.control$Par=='n.yrs'] #Number of years to simulate
 years <- 1:n.year
+
+n.sims <- in.control$Value[in.control$Par=='n.sims']
+
 Bstart <- 500 #700#in.control$Value[in.control$Par=='Bstart'] #Starting Biomass
 
 SSB0 <- 709e6 #709 million lbs from 2013 RARA
@@ -101,6 +104,8 @@ halibut <- read_update_params()
 params <- extract_params(halibut)
 if(!"params" %in% search()) { attach(params) }
 
+# extract_params(halibut)
+
 #=============================================================
 #Create data objects for simulation
 objs <- create_sim_objects()
@@ -112,60 +117,66 @@ if(!"objs" %in% search()) { attach(objs) }
 
 
 init.prop <- calc_init_age_prop()
-B[,1,] <- Bstart*1e6 * (init.prop)
-N[,1,] <- B[,1,] / wa
-
+i <- 1
+for(i in 1:n.sims) {
+  B[,1,,i] <- Bstart*1e6 * (init.prop)
+  N[,1,,i] <- B[,1,,i] / wa
+}#next i
 #=============================================================
 #Forward Simulation
 
-y <- 2
-for(y in 2:n.year) {
+i <- 1
+for(i in 1:n.sims) {
+
+  y <- 2
+  for(y in 2:n.year) {
   
   #Initial Recruitment
-  ssb[,,y-1] <- fa*N[,y-1,]
+  ssb[,,y-1,i] <- fa*N[,y-1,,i]
   
   
   #HARVEST CONTROL RULE
-  temp.ssb <- sum(ssb[,,y-1])
+  temp.ssb <- sum(ssb[,,y-1,i])
   #Fishing Sectors
   temp.fmort <- vector(length=n.gear)
   g <- 1
   for(g in 1:n.gear) {
-    temp.fmort[g] <- 0.1#HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
+    temp.fmort[g] <- 0.01#HCR_linear(curr.SSB=temp.ssb, SSB0=SSB0, floor.F=floors[g], ceiling.F=ceilings[g], 
                                   # ascent.range=ascent.range, plot=FALSE)
   }#next g
   
   #Ricker
   # rec[,y-1] <- 0.5 * ricker_recruit(ssb[y-1], steep, bo)
   #Beverton-Holt
-  rec[,y-1] <-  0.5 * beverton_holt_recruit(sum(ssb[,,y-1]), steep, bo=ro) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1,i] <-  0.5 * beverton_holt_recruit(sum(ssb[,,y-1,i]), steep, bo=ro) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
+  a <- 1
   for(a in 1:n.age) {
     #Update Numbers and Biomass Matrix
     if(a==1) { #Age-1
-      N[,y,a] <- rec[,y-1]
-      B[,y,a] <- rec[,y-1]*wa[,a]
+      N[,y,a,i] <- rec[,y-1,i]
+      B[,y,a,i] <- rec[,y-1,i]*wa[,a]
       # N[,y,a] <- rec[,y-1]/wa[,a]
       # B[,y,a] <- rec[,y-1]
     }else {
       h <- 1
       for(h in 1:n.sex) {
         #Instantaneous Version
-        F.a[h,y-1,a-1] <- sum(temp.fmort*va[h,a-1,])
-        Z.a[h,y-1,a-1] <- F.a[h,y-1,a-1] + mx[h,a-1]  #Natural mortality is NOT time-varying
+        F.a[h,y-1,a-1,i] <- sum(temp.fmort*va[h,a-1,])
+        Z.a[h,y-1,a-1,i] <- F.a[h,y-1,a-1,i] + mx[h,a-1]  #Natural mortality is NOT time-varying
         
         #Continuous
-        surv[h,y-1,a-1] <- exp(-Z.a[h,y-1,a-1])
-        mort[h,y-1,a-1] <- 1-surv[h,y-1,a-1]
+        surv[h,y-1,a-1,i] <- exp(-Z.a[h,y-1,a-1,i])
+        mort[h,y-1,a-1,i] <- 1-surv[h,y-1,a-1,i]
         
         #Update
         
-        N[h,y,a] <- N[h,y-1,a-1]*surv[h,y-1,a-1]
-        # B[h,y,a] <- B[h,y-1,a-1]*surv[h,y-1,a-1]
-        B[h,y,a] <- N[h,y,a]*wa[h,a]
+        N[h,y,a,i] <- N[h,y-1,a-1]*surv[h,y-1,a-1,i]
+        # B[h,y,a,i] <- B[h,y-1,a-1,i]*surv[h,y-1,a-1,i]
+        B[h,y,a,i] <- N[h,y,a,i]*wa[h,a]
         #Total Catch
-        C.n[h,y-1,a-1] <- N[h,y-1,a-1] * (F.a[h,y-1,a-1]/Z.a[h,y-1,a-1]) * (1-exp(-1*Z.a[h,y-1,a-1])) #Catch in number of halibut
-        C.b[h,y-1,a-1] <- C.n[h,y-1,a-1] * wa[h,a-1]
+        C.n[h,y-1,a-1,i] <- N[h,y-1,a-1,i] * (F.a[h,y-1,a-1,i]/Z.a[h,y-1,a-1,i]) * (1-exp(-1*Z.a[h,y-1,a-1,i])) #Catch in number of halibut
+        C.b[h,y-1,a-1,i] <- C.n[h,y-1,a-1,i] * wa[h,a-1]
         
         g <- 1
         for(g in 1:n.gear) {
@@ -173,11 +184,11 @@ for(y in 2:n.year) {
           # temp.Z <- temp.F + mx[h,a-1]
           temp.Z <- sum(temp.fmort*va[h,a-1,]) + mx[h,a-1]
           
-          # harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (F.a[h,y-1,a-1]/Z.a[h,y-1,a-1]) * (1-exp(-1*Z.a[h,y-1,a-1]))
-          harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
-          # harvest.n[h,y-1,a-1,g] <- N[h,y-1,a-1] * (va[h,a-1,g] * (1-exp(-1*(mx[h,a-1]*Z.a[h,y-1,a-1])))) /(Z.a[h,y-1,a-1])
+          # harvest.n[h,y-1,a-1,g,i] <- N[h,y-1,a-1,i] * (F.a[h,y-1,a-1,i]/Z.a[h,y-1,a-1,i]) * (1-exp(-1*Z.a[h,y-1,a-1,i]))
+          harvest.n[h,y-1,a-1,g,i] <- N[h,y-1,a-1,i] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
+          # harvest.n[h,y-1,a-1,g,i] <- N[h,y-1,a-1,i] * (va[h,a-1,g] * (1-exp(-1*(mx[h,a-1]*Z.a[h,y-1,a-1,i])))) /(Z.a[h,y-1,a-1,i])
           
-          harvest.b[h,y-1,a-1,g] <- harvest.n[h,y-1,a-1,g] * wa[h,a-1]
+          harvest.b[h,y-1,a-1,g,i] <- harvest.n[h,y-1,a-1,g,i] * wa[h,a-1]
         }#next gear
       }#next sex
     }
@@ -186,20 +197,20 @@ for(y in 2:n.year) {
       h <- 1
       for(h in 1:n.sex) {
         #Fish in Plus Group
-        F.a[h,y-1,a] <- sum(temp.fmort*va[h,a,])
-        Z.a[h,y-1,a] <- F.a[h,y-1,a] + mx[h,a]  #Natural mortality is NOT time-varying        
+        F.a[h,y-1,a,i] <- sum(temp.fmort*va[h,a,])
+        Z.a[h,y-1,a,i] <- F.a[h,y-1,a,i] + mx[h,a]  #Natural mortality is NOT time-varying        
         
         #Continuous
-        surv[h,y-1,a] <- exp(-Z.a[h,y-1,a])
-        mort[h,y-1,a] <- 1-surv[h,y-1,a]
+        surv[h,y-1,a,i] <- exp(-Z.a[h,y-1,a,i])
+        mort[h,y-1,a,i] <- 1-surv[h,y-1,a,i]
         
         #Update
-        N[h,y,a] <- N[h,y,a] + N[h,y-1,a]*surv[h,y-1,a] #New Entrants (calculated above), plus existing plus group occupants.
-        # B[h,y,a] <- B[h,y,a] + B[h,y-1,a]*surv[h,y-1,a] 
-        B[h,y,a] <- N[h,y,a] * wa[h,a]
+        N[h,y,a,i] <- N[h,y,a,i] + N[h,y-1,a,i]*surv[h,y-1,a,i] #New Entrants (calculated above), plus existing plus group occupants.
+        # B[h,y,a,i] <- B[h,y,a,i] + B[h,y-1,a,i]*surv[h,y-1,a,i] 
+        B[h,y,a,i] <- N[h,y,a,i] * wa[h,a]
         #Total Catch
-        C.n[h,y-1,a] <- N[h,y-1,a] * (F.a[h,y-1,a]/Z.a[h,y-1,a]) * (1-exp(-1*Z.a[h,y-1,a])) #Catch in number of halibut
-        C.b[h,y-1,a] <- C.n[h,y-1,a] * wa[h,a]
+        C.n[h,y-1,a,i] <- N[h,y-1,a,i] * (F.a[h,y-1,a,i]/Z.a[h,y-1,a,i]) * (1-exp(-1*Z.a[h,y-1,a,i])) #Catch in number of halibut
+        C.b[h,y-1,a,i] <- C.n[h,y-1,a,i] * wa[h,a]
         
         g <- 1
         for(g in 1:n.gear) {
@@ -207,14 +218,15 @@ for(y in 2:n.year) {
           # temp.Z <- temp.F + mx[h,a]
           temp.Z <- sum(temp.fmort*va[h,a,]) + mx[h,a]
           # 
-          harvest.n[h,y-1,a,g] <- N[h,y-1,a] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
-          harvest.b[h,y-1,a,g] <- harvest.n[h,y-1,a,g] * wa[h,a]
+          harvest.n[h,y-1,a,g,i] <- N[h,y-1,a,i] * (temp.F/temp.Z) * (1-exp(-1*temp.Z))
+          harvest.b[h,y-1,a,g,i] <- harvest.n[h,y-1,a,g,i] * wa[h,a]
         }#next gear
       }#next sex
     }# If plus age group
   }#next age  
 }#next y
 
+}#next i
 
 list.B <- melt(B) 
 names(list.B) <- c('Sex','Year','Age','value')
