@@ -62,9 +62,11 @@ C_to_F <- function(C.input, N.input, Catch.biom=TRUE, ...) {
     
     #LIKELIHOOD COMPONENT
     if(Catch.biom==TRUE) {
-      SSQ <- sum((C.input-pred.total.b)^2)
+      # SSQ <- sum((C.input-pred.total.b)^2)
+      SSQ <- sum(log(C.input/pred.total.b)^2)
     }else {
-      SSQ <- sum((C.input-pred.total.n)^2)
+      # SSQ <- sum((C.input-pred.total.n)^2)
+      SSQ <- sum(log(C.input/pred.total.n)^2)
     }
     # })
     return(SSQ)
