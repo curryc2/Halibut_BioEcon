@@ -1,10 +1,11 @@
 #' Function to create data objects for simulation
 #'
+#' @param halibut List object containing demographic and fishery parameters for simulation.
+#'
 #' @return A named list with all of the data structures to be attached after function call
 #' @export
 #'
 create_sim_objects <- function() {
-
   lz  <- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
   za  <- matrix(0,nrow=n.sex,ncol=n.age)
   qa  <- array(0,dim=c(n.sex,n.age,n.gear))
@@ -14,25 +15,28 @@ create_sim_objects <- function() {
   
   #========================================================
   #Define Data Structures
-  B <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Biomass (pounds)
-  N <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Numbers
-  C.b <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Catch (lbs)
-  C.n <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Catch (number)
-  harvest.b <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, gears))  #Harvest (lbs) by gear type
-  harvest.n <- array(dim=c(n.sex, n.year, n.age, n.gear), dimnames=list(sexes, years, ages, gears))  #Harvest (number) by gear type
+  
+  sims <- paste0('sim',c(1:n.sims))
+  
+  B <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Biomass (pounds)
+  N <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Numbers
+  C.b <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (lbs)
+  C.n <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (number)
+  harvest.b <- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (lbs) by gear type
+  harvest.n <- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (number) by gear type
   
   
   #Total Instantaneous mortality
-  Z.a <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) 
-  F.a <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages)) #Fishing mortality
+  Z.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) 
+  F.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Fishing mortality
   
   #Continuous
-  surv <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
-  mort <- array(dim=c(n.sex, n.year, n.age), dimnames=list(sexes, years, ages))
+  surv <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
+  mort <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
   
   #Recruitment
-  ssb <- array(dim=c(n.sex, n.age, n.year), dimnames=list(sexes, ages, years)) #Female spawning-stock biomass
-  rec <- array(dim=c(n.sex, n.year), dimnames=list(sexes, years))
+  ssb <- array(dim=c(n.sex, n.age, n.year, n.sims), dimnames=list(sexes, ages, years, sims)) #Female spawning-stock biomass
+  rec <- array(dim=c(n.sex, n.year, n.sims), dimnames=list(sexes, years, sims))
   
   #Return section
   out <- NULL
@@ -55,4 +59,5 @@ create_sim_objects <- function() {
   out$ssb <- ssb
   out$rec <- rec
   return(out)
+  
 }
