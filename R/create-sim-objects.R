@@ -28,7 +28,8 @@ create_sim_objects <- function() {
   
   #Total Instantaneous mortality
   Z.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) 
-  F.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Fishing mortality
+  F.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Age-specific Fishing mortality
+  Fmort <- array(dim=c(n.sex, n.year, n.sims), dimnames=list(sexes, years, sims)) #Annual Fishing mortality
   
   #Continuous
   surv <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
@@ -54,6 +55,7 @@ create_sim_objects <- function() {
   out$harvest.n <- harvest.n
   out$Z.a <- Z.a
   out$F.a <- F.a
+  out$Fmort <- Fmort
   out$surv <- surv
   out$mort <- mort
   out$ssb <- ssb
