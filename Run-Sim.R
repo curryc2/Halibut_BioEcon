@@ -161,7 +161,7 @@ for(i in 1:n.sims) {
   #Ricker
   # rec[,y-1] <- 0.5 * ricker_recruit(ssb[y-1], steep, bo)
   #Beverton-Holt
-  rec[,y-1,i] <-  0.5 * beverton_holt_recruit(sum(ssb[,,y-1,i]), steep, bo=ro) #* exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
+  rec[,y-1,i] <-  0.5 * beverton_holt_recruit(sum(ssb[,,y-1,i]), steep, bo=ro) * exp(rnorm(1,0,sigma_rec) - ((sigma_rec^2)/2))
   
   a <- 1
   for(a in 1:n.age) {
@@ -277,7 +277,14 @@ g <- ggplot(list.ssb[list.ssb$Sex=='Female' & list.ssb$Sim=='sim1',], aes(x=Year
 # scale_fill_brewer(palette="RdYlGn")
 g
 
-#Plot 
+#Plot replicate simulations
+total.ssb <- list.ssb %>% subset(Sex=='Female') %>% group_by(Year, Sim) %>% summarize('total.ssb'=sum(value))
+
+g <- ggplot(total.ssb, aes(x=Year, y=total.ssb, color=Sim)) +
+       geom_line(alpha=0.5) +
+       scale_color_colorblind() +
+       scale_y_continuous(ymin=0)
+g
 
 #=============================================================
 #### DETACHING SECTION ####
