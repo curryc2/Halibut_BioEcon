@@ -19,11 +19,20 @@ calc-SBpR.R                                | Function to calculate spawning biom
 
 ***
 ### Harvest Control Rule Options
+Functions for alternative harvest control rules used for setting fishing mortality rate **F** or **biomass/abundance** level.
+
+* Contained in [R/HCR](https://github.com/curryc2/Halibut_BioEcon/tree/master/R/HCR)
 
 Script Name                                | Control Rule
 -------------------------------------------|-----------------------------------------
 HCR-linear.R                               | Sloping linear control rule with specified floor, ceiling, and transition zone.
 HCR-threshold.R                            | Threshold harvest control rule, with specified floor and ceiling.
+
+***
+### Observation Error Functions
+Functions for adding observation error to observed quantities.
+
+* Contained in [R/Obs_Error](https://github.com/curryc2/Halibut_BioEcon/tree/master/R/Obs_Error)
 
 Credit:
 =============

@@ -58,6 +58,7 @@ require(xlsx)
 require(corrplot)
 require(R.utils)
 require(ggthemes)
+require(viridis)
 
 #Working Directory
 
@@ -75,6 +76,8 @@ source('R/HCR/HCR-linear.R')
 
 source('R/calc-init-age-prop.R')
 
+#Observation Error Fxns
+
 
 
 #=============================================================
@@ -91,7 +94,7 @@ SSB0 <- 709e6 #709 million lbs from 2013 RARA
 
 #For Harvest Control Rules
 floors <- rep(0,4)
-ceilings <- rep(0.7,4)#c(0.1,0.05,0.01,0.01)
+ceilings <- rep(0.0,4)#c(0.1,0.05,0.01,0.01)
 ascent.range <- c(0.2,0.4)
 #=============================================================
 #1) Adjust halibut object values based on inputs from spreadsheet
@@ -278,12 +281,14 @@ g <- ggplot(list.ssb[list.ssb$Sex=='Female' & list.ssb$Sim=='sim1',], aes(x=Year
 g
 
 #Plot replicate simulations
+list.ssb <- melt(ssb)
+names(list.ssb) <- c('Sex', 'Age', 'Year', 'Sim', 'value')
 total.ssb <- list.ssb %>% subset(Sex=='Female') %>% group_by(Year, Sim) %>% summarize('total.ssb'=sum(value))
 
 g <- ggplot(total.ssb, aes(x=Year, y=total.ssb, color=Sim)) +
        geom_line(alpha=0.5) +
-       scale_color_colorblind() +
-       scale_y_continuous(ymin=0)
+       scale_color_viridis(discrete=TRUE) #+
+       # scale_y_continuous(ymin=0)
 g
 
 #=============================================================
