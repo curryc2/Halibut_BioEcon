@@ -30,7 +30,7 @@ HCR-threshold.R                            | Threshold harvest control rule, wit
 
 ***
 ### Observation Error Functions
-Functions for adding observation error to observed quantities.
+Functions for adding observation error to indices of abundance and composition samples.
 
 * Contained in [R/Obs_Error](https://github.com/curryc2/Halibut_BioEcon/tree/master/R/Obs_Error)
 
