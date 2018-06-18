@@ -20,10 +20,10 @@ sample_biom_abund <- function(true.values, sigma=NULL, type='lognorm', seed=NULL
   obs.values <- NULL
   
   if(type=='lognorm') {
-    obs.values <- true.values*exp(rnorm(n=1, mean=0,sd=sigma)-sigma^2/2)
+    obs.values <- true.values*exp(rnorm(n=length(true.values), mean=0,sd=sigma)-sigma^2/2)
   }
   if(type=='norm') {
-    obs.values <- true.values*rnorm(n=1, mean=1,sd=sigma)
+    obs.values <- true.values*rnorm(n=length(true.values), mean=1,sd=sigma)
   }
   if(type=='pois') {
     obs.values <- rpois(n=length(true.values), true.values)
