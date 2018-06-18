@@ -45,6 +45,8 @@ read_update_params <- function() {
   halibut$rec$ro  <- as.numeric(in.rec$Value[in.rec$Par=='ro'])
   
   #=========================================
+  #Calculate halibut selectivity at age by sex
+  
   halibut <- getSelectivities(halibut)
 
   return(halibut)

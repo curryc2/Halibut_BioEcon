@@ -447,8 +447,8 @@ getSelectivities <- function(ffp)
 			#CURRY:
 			all.ra[h,,k] <- ra
 			
-			da <- (1-ra)*MP$dmr[k]
-			va[h,,k] <- sc*(ra+da)
+			da <- (1-ra)*MP$dmr[k] #Discard Mortality
+			va[h,,k] <- sc*(ra+da) #Selectivity
 		}
     
 # 		print('sc')
