@@ -6,38 +6,38 @@
 #' @export
 #'
 create_sim_objects <- function() {
-  lz  <- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
-  za  <- matrix(0,nrow=n.sex,ncol=n.age)
-  qa  <- array(0,dim=c(n.sex,n.age,n.gear))
-  pa  <- array(0,dim=c(n.sex,n.age,n.gear))
-  ra  <- array(0,dim=c(n.sex,n.age,n.gear))
-  dlz <- array(0,dim=c(n.sex,n.age,n.gear))
+  lz  <<- matrix(1/n.sex,nrow=n.sex,ncol=n.age)
+  za  <<- matrix(0,nrow=n.sex,ncol=n.age)
+  qa  <<- array(0,dim=c(n.sex,n.age,n.gear))
+  pa  <<- array(0,dim=c(n.sex,n.age,n.gear))
+  ra  <<- array(0,dim=c(n.sex,n.age,n.gear))
+  dlz <<- array(0,dim=c(n.sex,n.age,n.gear))
   
   #========================================================
   #Define Data Structures
   
-  sims <- paste0('sim',c(1:n.sims))
+  sims <<- paste0('sim',c(1:n.sims))
   
-  B <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Biomass (pounds)
-  N <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Numbers
-  C.b <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (lbs)
-  C.n <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (number)
-  harvest.b <- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (lbs) by gear type
-  harvest.n <- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (number) by gear type
+  B <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Biomass (pounds)
+  N <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Numbers
+  C.b <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (lbs)
+  C.n <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Catch (number)
+  harvest.b <<- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (lbs) by gear type
+  harvest.n <<- array(dim=c(n.sex, n.year, n.age, n.gear, n.sims), dimnames=list(sexes, years, ages, gears, sims))  #Harvest (number) by gear type
   
   
   #Total Instantaneous mortality
-  Z.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) 
-  F.a <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Age-specific Fishing mortality
-  Fmort <- array(dim=c(n.gear, n.year, n.sims), dimnames=list(gears, years, sims)) #Annual Fishing mortality
+  Z.a <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) 
+  F.a <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims)) #Age-specific Fishing mortality
+  Fmort <<- array(dim=c(n.gear, n.year, n.sims), dimnames=list(gears, years, sims)) #Annual Fishing mortality
   
   #Continuous
-  surv <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
-  mort <- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
+  surv <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
+  mort <<- array(dim=c(n.sex, n.year, n.age, n.sims), dimnames=list(sexes, years, ages, sims))
   
   #Recruitment
-  ssb <- array(dim=c(n.sex, n.age, n.year, n.sims), dimnames=list(sexes, ages, years, sims)) #Female spawning-stock biomass
-  rec <- array(dim=c(n.sex, n.year, n.sims), dimnames=list(sexes, years, sims))
+  ssb <<- array(dim=c(n.sex, n.age, n.year, n.sims), dimnames=list(sexes, ages, years, sims)) #Female spawning-stock biomass
+  rec <<- array(dim=c(n.sex, n.year, n.sims), dimnames=list(sexes, years, sims))
   
   #Return section
   out <- NULL

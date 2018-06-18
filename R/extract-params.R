@@ -7,35 +7,35 @@
 #'
 extract_params <- function(halibut) {
   
-  n.age  <- halibut$theta$A
-  n.gear <- dim(halibut$MP)[1]
-  n.sex  <- halibut$theta$H
-  va <- as.array(halibut$selex) #Overall selectivity
+  n.age  <<- halibut$theta$A
+  n.gear <<- dim(halibut$MP)[1]
+  n.sex  <<- halibut$theta$H
+  va <<- as.array(halibut$selex) #Overall selectivity
   
-  gears <- as.vector(halibut$MP$sector)
+  gears <<- as.vector(halibut$MP$sector)
   
   
-  probCap <- as.array(halibut$probCap) #Probability of capture @ age
-  probRetain <- as.array(halibut$probRetain)
+  probCap <<- as.array(halibut$probCap) #Probability of capture @ age
+  probRetain <<- as.array(halibut$probRetain)
   
   #Age Schedule stuff
-  mx <- halibut$ageSc$mx  #Natural mortality @ age
-  la <- halibut$ageSc$la  #Length @ age
-  wa <- halibut$ageSc$wa  #Weight @ age
-  ma <- halibut$ageSc$ma  #Maturity @ age
-  fa <- halibut$ageSc$fa  #Fecundity @ age
-  lx <- halibut$ageSc$lx  #Survivorship to age
+  mx <<- halibut$ageSc$mx  #Natural mortality @ age
+  la <<- halibut$ageSc$la  #Length @ age
+  wa <<- halibut$ageSc$wa  #Weight @ age
+  ma <<- halibut$ageSc$ma  #Maturity @ age
+  fa <<- halibut$ageSc$fa  #Fecundity @ age
+  lx <<- halibut$ageSc$lx  #Survivorship to age
   
   #Age Information
-  ages <- halibut$theta$age
-  plus.age <- halibut$theta$A
-  sexes <- c('Female','Male')
+  ages <<- halibut$theta$age
+  plus.age <<- halibut$theta$A
+  sexes <<- c('Female','Male')
   
   #Recruitment
-  steep <- halibut$rec$steep
-  sigma_rec <- halibut$rec$sigma_rec
-  ro <- halibut$rec$ro
-  bo <- halibut$theta$bo*1e6
+  steep <<- halibut$rec$steep
+  sigma_rec <<- halibut$rec$sigma_rec
+  ro <<- halibut$rec$ro
+  bo <<- halibut$theta$bo*1e6
   
   
   #Return Section

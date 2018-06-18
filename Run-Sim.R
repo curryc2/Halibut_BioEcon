@@ -105,14 +105,14 @@ halibut <- read_update_params()
 #=============================================================
 #Extract variables
 params <- extract_params(halibut)
-if(!"params" %in% search()) { attach(params) }
+# if(!"params" %in% search()) { attach(params) }
 
 # extract_params(halibut)
 
 #=============================================================
 #Create data objects for simulation
 objs <- create_sim_objects()
-if(!"objs" %in% search()) { attach(objs) }
+# if(!"objs" %in% search()) { attach(objs) }
 
 #=============================================================
 #Initialize Population (year 1)
@@ -283,20 +283,24 @@ g
 #Plot replicate simulations
 list.ssb <- melt(ssb)
 names(list.ssb) <- c('Sex', 'Age', 'Year', 'Sim', 'value')
-total.ssb <- list.ssb %>% subset(Sex=='Female') %>% group_by(Year, Sim) %>% summarize('total.ssb'=sum(value))
+total.ssb <- list.ssb %>% subset(Sex=='Female') %>% group_by(Year, Sim) %>% 
+               summarize('total.ssb'=sum(value))
 
-g <- ggplot(total.ssb, aes(x=Year, y=total.ssb, color=Sim)) +
+g <- ggplot(total.ssb, aes(x=Year, y=total.ssb/1e6, color=Sim)) +
        geom_line(alpha=0.5) +
-       scale_color_viridis(discrete=TRUE) #+
-       # scale_y_continuous(ymin=0)
+       theme_solarized() +
+       scale_color_viridis(discrete=TRUE) +
+       # scale_color_colorblind() +
+       ylab('Total Spawning Stock Biomass (millions)') +
+       ylim(c(0,NA))
 g
 
 #=============================================================
 #### DETACHING SECTION ####
 
 #Detatching section
-detach(objs)
-detach(params)
+# detach(objs)
+# detach(params)
 # detach(ageSc)
 # detach(halibut)
 
