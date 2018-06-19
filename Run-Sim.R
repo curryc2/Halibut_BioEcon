@@ -96,38 +96,34 @@ SSB0 <- 709e6 #709 million lbs from 2013 RARA
 floors <- rep(0,4)
 ceilings <- rep(0.0,4)#c(0.1,0.05,0.01,0.01)
 ascent.range <- c(0.2,0.4)
-#=============================================================
+
+# Update Parameters =============================================================
 #1) Adjust halibut object values based on inputs from spreadsheet
 #2) Calculate survival/growth by age
 #3) Calculate selectivity by age
 halibut <- read_update_params()
 
-#=============================================================
-#Extract variables
+# Extract Variables =============================================================
+
 params <- extract_params(halibut)
 # if(!"params" %in% search()) { attach(params) }
 
 # extract_params(halibut)
 
-#=============================================================
-#Create data objects for simulation
+# Create Simulation Objects =============================================================
 objs <- create_sim_objects()
 # if(!"objs" %in% search()) { attach(objs) }
 
-#=============================================================
-#Initialize Population (year 1)
+# Initialize Population (year 1) =============================================================
 #   Should probably update to start from FISHED equilibrium
-
-
 init.prop <- calc_init_age_prop()
 i <- 1
 for(i in 1:n.sims) {
   B[,1,,i] <- Bstart*1e6 * (init.prop)
   N[,1,,i] <- B[,1,,i] / wa
 }#next i
-#=============================================================
-#Forward Simulation
 
+# Forward Simulation =============================================================
 i <- 1
 for(i in 1:n.sims) {
   print(paste('Sim:',i,'of',n.sims))
